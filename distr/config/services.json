@@ -1,0 +1,77 @@
+{
+	"environment": {
+		"connection": [
+			{
+				"jType": "Postgre",
+				"account": {
+					"login": "postgres",
+					"password": "sv5password"					
+				},
+				"server": {
+					"host": "192.168.56.110",
+					"dbName": "SecurityVision",
+					"port": 5432
+				}
+			},
+			{
+				"jType": "RabbitMq",
+				"host": "192.168.56.110",
+				"port": 5672,
+				"username": "user",
+				"password": "sv5password"
+			},
+			{
+				"jType": "Elastic",
+				"uri": "http://192.168.56.110:9200"
+			}
+		],
+		"destinationPath": "/opt/securityvision/"
+	},
+	"features": [	
+		{
+			"jType": "PortalDatabase"
+		},
+		{
+			"jType": "Service",
+			"serviceKey": "collector",
+			"runAccount": {
+				"type": "New",
+				"username": "sv"
+			}
+		},
+		{
+			"jType": "Service",
+			"serviceKey": "processing",
+			"runAccount": {
+				"type": "New",
+				"username": "sv"
+			}
+		},
+		{
+			"jType": "Service",
+			"serviceKey": "notifications",
+			"runAccount": {
+				"type": "New",
+				"username": "sv"
+			}
+		},
+		{
+			"jType": "Service",
+			"serviceKey": "reporting",
+			"runAccount": {
+				"type": "New",
+				"username": "sv"
+			}
+		},
+		{
+			"jType": "Nginx",
+			"cert": {
+				"type": "SelfSigned"
+			},
+			"runAccount": {
+				"username": "nginx"
+			}
+		}
+	],
+	"jType": "Install"
+}
