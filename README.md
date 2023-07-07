@@ -11,11 +11,3 @@
 # Deployment
 
 * Start deployment with `vagrant up` command
-
-# Screenshots
-
-![Screenshot_01](images/ha-proxy.png)
-
-![Screenshot_02](images/virtual-box.png)
-
-![Screenshot_03](images/sv5.png)
