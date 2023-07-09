@@ -160,16 +160,16 @@ Vagrant.configure(2) do |config|
     end
     sv5services.vm.network "private_network", ip: SV_SERVICES_IP
     sv5services.vm.provision "shell", path: "downloader.sh", env: {
-      "NEXUS_LOGIN" => $NEXUS_LOGIN,
-      "NEXUS_PASSWORD" => $NEXUS_PASSWORD,
-      "NEXUS_URL" => $NEXUS_URL,
+      "NEXUS_LOGIN" => ENV["NEXUS_LOGIN"],
+      "NEXUS_PASSWORD" => ENV["NEXUS_PASSWORD"],
+      "NEXUS_URL" => ENV["NEXUS_URL"],
       "NEXUS_FILE" => "redist.tar.gz",
       "FILE_PATH" => "/distr/redist.tar.gz"
     }
     sv5services.vm.provision "shell", path: "downloader.sh", env: {
-      "NEXUS_LOGIN" => $NEXUS_LOGIN,
-      "NEXUS_PASSWORD" => $NEXUS_PASSWORD,
-      "NEXUS_URL" => $NEXUS_URL,
+      "NEXUS_LOGIN" => ENV["NEXUS_LOGIN"],
+      "NEXUS_PASSWORD" => ENV["NEXUS_PASSWORD"],
+      "NEXUS_URL" => ENV["NEXUS_URL"],
       "NEXUS_FILE" => "SecurityVisionPlatform-console.v5",
       "FILE_PATH" => "/distr/installer-console.v5"
     }

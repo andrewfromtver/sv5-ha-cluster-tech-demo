@@ -1,9 +1,3 @@
 #!/bin/bash
 
-# curl -k -u "$NEXUS_LOGIN":"$NEXUS_PASSWORD" -X GET "$NEXUS_URL"/"$NEXUS_FILE" -o "$FILE_PATH"
-
-echo $NEXUS_LOGIN
-echo $NEXUS_PASSWORD
-echo $NEXUS_URL
-echo $NEXUS_FILE
-echo $FILE_PATH
+curl -k -u "$NEXUS_LOGIN":"$NEXUS_PASSWORD" -X GET "$NEXUS_URL"/"$NEXUS_FILE" -o "$FILE_PATH"
