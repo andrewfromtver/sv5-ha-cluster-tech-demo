@@ -27,7 +27,7 @@ deploy-job:
     - curl "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage?chat_id=$TELEGRAM_CHAT_ID&text=%20🛠%20%5B$CI_PROJECT_NAME%5D%20Deploy%20job%20started"
   script:
     - vagrant destroy -f
-    - vagrant up sv5services 2>&1 | tee deploy.log
+    - vagrant up sv5elastic 2>&1 | tee deploy.log
   after_script:
     - >
       if [ $CI_JOB_STATUS == 'success' ]; then

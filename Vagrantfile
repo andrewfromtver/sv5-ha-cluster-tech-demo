@@ -49,7 +49,6 @@ Vagrant.configure(2) do |config|
   CONNECTORS_IP_ARRAY = [SV_CONNECTORS_1_IP, SV_CONNECTORS_2_IP, SV_CONNECTORS_3_IP]
 
   (1..$count).each do |i|
-
     config.vm.define "pgnode#{i}" do |pgnode|
       pgnode.vm.box = VM_BOX_DEBIAN
       pgnode.vm.provider "virtualbox" do |v|
@@ -121,14 +120,22 @@ Vagrant.configure(2) do |config|
       v.cpus = SV_ELASTIC_CPU
     end
     sv5elastic.vm.network "private_network", ip: SV_ELASTIC_IP
+    sv5services.vm.synced_folder "./distr/", "/distr"
+    sv5services.vm.provision "shell", path: "downloader.sh", env: {
+      "NEXUS_LOGIN" => ENV["NEXUS_LOGIN"],
+      "NEXUS_PASSWORD" => ENV["NEXUS_PASSWORD"],
+      "NEXUS_URL" => ENV["NEXUS_URL"],
+      "NEXUS_FILE" => "redist.tar.gz",
+      "FILE_PATH" => "/distr/redist.tar.gz"
+    }
     sv5elastic.vm.provision "shell", inline: <<-SHELL
-        
-        echo "network.host: 192.168.56.114" >> /etc/elasticsearch/elasticsearch.yml
-        echo "discovery.seed_hosts: [192.168.56.110]" >> /etc/elasticsearch/elasticsearch.yml
-        systemctl enable elasticsearch.service
-        systemctl start elasticsearch.service
-        systemctl status elasticsearch.service
-
+      tar -xvf /distr/redist.tar.gz
+      dpkg -i /distr/redist/elastic/*.deb
+      echo "network.host: 192.168.56.114" >> /etc/elasticsearch/elasticsearch.yml
+      echo "discovery.seed_hosts: [192.168.56.110]" >> /etc/elasticsearch/elasticsearch.yml
+      systemctl enable elasticsearch.service
+      systemctl start elasticsearch.service
+      systemctl status elasticsearch.service
     SHELL
   end
 
@@ -141,8 +148,9 @@ Vagrant.configure(2) do |config|
       v.cpus = SV_RABBITMQ_CPU
     end
     sv5rabbitmq.vm.network "private_network", ip: SV_RABBITMQ_IP
+    sv5services.vm.synced_folder "./distr/", "/distr"
     sv5rabbitmq.vm.provision "shell", inline: <<-SHELL
-      
+      dpkg -i /distr/redist/rabbit/*.deb
       rabbitmqctl add_user #{RABBITMQ_USER} #{RABBITMQ_PASSWORD}
       rabbitmqctl set_user_tags #{RABBITMQ_USER} administrator
       rabbitmqctl set_permissions -p / #{RABBITMQ_USER} ".*" ".*" ".*"
@@ -160,16 +168,7 @@ Vagrant.configure(2) do |config|
     end
     sv5services.vm.network "private_network", ip: SV_SERVICES_IP
     sv5services.vm.synced_folder "./config/", "/config"
-    sv5services.vm.provision "shell", inline: <<-SHELL
-        mkdir /distr
-    SHELL
-    sv5services.vm.provision "shell", path: "downloader.sh", env: {
-      "NEXUS_LOGIN" => ENV["NEXUS_LOGIN"],
-      "NEXUS_PASSWORD" => ENV["NEXUS_PASSWORD"],
-      "NEXUS_URL" => ENV["NEXUS_URL"],
-      "NEXUS_FILE" => "redist.tar.gz",
-      "FILE_PATH" => "/distr/redist.tar.gz"
-    }
+    sv5services.vm.synced_folder "./distr/", "/distr"
     sv5services.vm.provision "shell", path: "downloader.sh", env: {
       "NEXUS_LOGIN" => ENV["NEXUS_LOGIN"],
       "NEXUS_PASSWORD" => ENV["NEXUS_PASSWORD"],
@@ -178,9 +177,8 @@ Vagrant.configure(2) do |config|
       "FILE_PATH" => "/distr/installer-console.v5"
     }
     sv5services.vm.provision "shell", inline: <<-SHELL
-        tar -xvf /distr/redist.tar.gz
-        chmod +x /distr/installer-console.v5
-        /distr/installer-console.v5 --config /config/services.json
+      chmod +x /distr/installer-console.v5
+      /distr/installer-console.v5 --config /config/services.json
     SHELL
   end
 
