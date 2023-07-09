@@ -159,7 +159,7 @@ Vagrant.configure(2) do |config|
       v.cpus = SV_SERVICES_CPU
     end
     sv5services.vm.network "private_network", ip: SV_SERVICES_IP
-    sv5connectors.vm.synced_folder "./config/", "/config"
+    sv5services.vm.synced_folder "./config/", "/config"
     sv5services.vm.provision "shell", inline: <<-SHELL
         mkdir /distr
     SHELL
