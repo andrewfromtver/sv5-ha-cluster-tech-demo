@@ -33,6 +33,7 @@ SV_CONNECTORS_2_IP = "192.168.56.118"
 SV_CONNECTORS_3_IP = "192.168.56.119"
 SV_WEBPORTAL_IP = "192.168.56.120"
 
+POSTGRES_MAJOR_VERSION = 14
 POSTGRES_PASSWORD = "sv5password"
 
 RABBITMQ_USER = "user"
@@ -61,6 +62,7 @@ Vagrant.configure(2) do |config|
       pgnode.vm.provision "shell", path: 'db_node_init.sh', env: {
         "NODE_NAME" => "pgnode#{i}",
         "ETCD_CLUSTER_TOKEN" => ETCD_CLUSTER_TOKEN,
+        "POSTGRES_MAJOR_VERSION" => POSTGRES_MAJOR_VERSION,
         "POSTGRES_PASSWORD" => POSTGRES_PASSWORD,
         "HA_PROXY_IP" => HA_PROXY_IP,
         "MASTER_IP" => MASTER_IP,
