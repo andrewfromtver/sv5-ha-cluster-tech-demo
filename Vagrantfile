@@ -162,13 +162,15 @@ Vagrant.configure(2) do |config|
     sv5services.vm.provision "shell", path: "downloader.sh", env: {
       "NEXUS_LOGIN" => $NEXUS_LOGIN,
       "NEXUS_PASSWORD" => $NEXUS_PASSWORD,
-      "NEXUS_URL" => $NEXUS_URL + "/redist.tar.gz",
+      "NEXUS_URL" => $NEXUS_URL,
+      "NEXUS_FILE" => "redist.tar.gz",
       "FILE_PATH" => "/distr/redist.tar.gz"
     }
     sv5services.vm.provision "shell", path: "downloader.sh", env: {
       "NEXUS_LOGIN" => $NEXUS_LOGIN,
       "NEXUS_PASSWORD" => $NEXUS_PASSWORD,
-      "NEXUS_URL" => $NEXUS_URL + "/SecurityVisionPlatform-console.v5",
+      "NEXUS_URL" => $NEXUS_URL,
+      "NEXUS_FILE" => "SecurityVisionPlatform-console.v5",
       "FILE_PATH" => "/distr/installer-console.v5"
     }
     sv5services.vm.provision "shell", inline: <<-SHELL
