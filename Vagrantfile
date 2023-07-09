@@ -120,8 +120,8 @@ Vagrant.configure(2) do |config|
       v.cpus = SV_ELASTIC_CPU
     end
     sv5elastic.vm.network "private_network", ip: SV_ELASTIC_IP
-    sv5services.vm.synced_folder "./distr/", "/distr"
-    sv5services.vm.provision "shell", path: "downloader.sh", env: {
+    sv5elastic.vm.synced_folder "./distr/", "/distr"
+    sv5elastic.vm.provision "shell", path: "downloader.sh", env: {
       "NEXUS_LOGIN" => ENV["NEXUS_LOGIN"],
       "NEXUS_PASSWORD" => ENV["NEXUS_PASSWORD"],
       "NEXUS_URL" => ENV["NEXUS_URL"],
