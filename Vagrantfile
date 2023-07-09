@@ -129,7 +129,7 @@ Vagrant.configure(2) do |config|
       "FILE_PATH" => "/distr/redist.tar.gz"
     }
     sv5elastic.vm.provision "shell", inline: <<-SHELL
-      tar -xvf /distr/redist.tar.gz
+      tar -xvf /distr/redist.tar.gz -C /distr/
       dpkg -i /distr/redist/elastic/*.deb
       echo "network.host: 192.168.56.114" >> /etc/elasticsearch/elasticsearch.yml
       echo "discovery.seed_hosts: [192.168.56.110]" >> /etc/elasticsearch/elasticsearch.yml
