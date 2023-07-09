@@ -150,7 +150,7 @@ Vagrant.configure(2) do |config|
     sv5rabbitmq.vm.network "private_network", ip: SV_RABBITMQ_IP
     sv5rabbitmq.vm.synced_folder "./distr/", "/distr"
     sv5rabbitmq.vm.provision "shell", inline: <<-SHELL
-      dpkg -i /distr/redist/rabbit/*.deb
+      dpkg -i /distr/redist/rabbitmq/*.deb
       rabbitmqctl add_user #{RABBITMQ_USER} #{RABBITMQ_PASSWORD}
       rabbitmqctl set_user_tags #{RABBITMQ_USER} administrator
       rabbitmqctl set_permissions -p / #{RABBITMQ_USER} ".*" ".*" ".*"
@@ -192,8 +192,9 @@ Vagrant.configure(2) do |config|
         v.cpus = SV_CONNECTORS_CPU
       end
       sv5connectors.vm.network "private_network", ip: CONNECTORS_IP_ARRAY[i - 1]
+      sv5connectors.vm.synced_folder "./config/", "/config"
+      sv5connectors.vm.synced_folder "./distr/", "/distr"
       sv5connectors.vm.provision "shell", inline: <<-SHELL
-
           chmod +x /distr/installer-console.v5
           /distr/installer-console.v5 --config /config/connectors.json
       SHELL
@@ -209,8 +210,9 @@ Vagrant.configure(2) do |config|
       v.cpus = SV_WEBPORTAL_CPU
     end
     sv5webportal.vm.network "private_network", ip: SV_WEBPORTAL_IP
+    sv5webportal.vm.synced_folder "./config/", "/config"
+    sv5webportal.vm.synced_folder "./distr/", "/distr"
     sv5webportal.vm.provision "shell", inline: <<-SHELL
-
         chmod +x /distr/installer-console.v5
         /distr/installer-console.v5 --config /config/webportal.json
     SHELL
