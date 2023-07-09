@@ -1,0 +1,3 @@
+#!/bin/bash
+
+curl -k -u $NEXUS_LOGIN:$NEXUS_PASSWORD -X GET $NEXUS_URL -o $FILE_PATH

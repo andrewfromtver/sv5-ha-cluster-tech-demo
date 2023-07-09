@@ -121,9 +121,8 @@ Vagrant.configure(2) do |config|
       v.cpus = SV_ELASTIC_CPU
     end
     sv5elastic.vm.network "private_network", ip: SV_ELASTIC_IP
-    sv5elastic.vm.synced_folder "./distr/", "/distr"
     sv5elastic.vm.provision "shell", inline: <<-SHELL
-        dpkg -i /distr/redist/elastic/*.deb
+        
         echo "network.host: 192.168.56.114" >> /etc/elasticsearch/elasticsearch.yml
         echo "discovery.seed_hosts: [192.168.56.110]" >> /etc/elasticsearch/elasticsearch.yml
         systemctl enable elasticsearch.service
@@ -142,9 +141,8 @@ Vagrant.configure(2) do |config|
       v.cpus = SV_RABBITMQ_CPU
     end
     sv5rabbitmq.vm.network "private_network", ip: SV_RABBITMQ_IP
-    sv5rabbitmq.vm.synced_folder "./distr/", "/distr"
     sv5rabbitmq.vm.provision "shell", inline: <<-SHELL
-      dpkg -i /distr/redist/rabbitmq/*.deb
+      
       rabbitmqctl add_user #{RABBITMQ_USER} #{RABBITMQ_PASSWORD}
       rabbitmqctl set_user_tags #{RABBITMQ_USER} administrator
       rabbitmqctl set_permissions -p / #{RABBITMQ_USER} ".*" ".*" ".*"
@@ -161,10 +159,22 @@ Vagrant.configure(2) do |config|
       v.cpus = SV_SERVICES_CPU
     end
     sv5services.vm.network "private_network", ip: SV_SERVICES_IP
-    sv5services.vm.synced_folder "./distr/", "/distr"
+    sv5services.vm.provision "shell", path: "downloader.sh", env: {
+      "NEXUS_LOGIN" => $NEXUS_LOGIN,
+      "NEXUS_PASSWORD" => $NEXUS_PASSWORD,
+      "NEXUS_URL" => $NEXUS_URL + "/redist.tar.gz",
+      "FILE_PATH" => "/distr/redist.tar.gz"
+    }
+    sv5services.vm.provision "shell", path: "downloader.sh", env: {
+      "NEXUS_LOGIN" => $NEXUS_LOGIN,
+      "NEXUS_PASSWORD" => $NEXUS_PASSWORD,
+      "NEXUS_URL" => $NEXUS_URL + "/SecurityVisionPlatform-console.v5",
+      "FILE_PATH" => "/distr/installer-console.v5"
+    }
     sv5services.vm.provision "shell", inline: <<-SHELL
+        tar -xvf /distr/redist.tar.gz
         chmod +x /distr/installer-console.v5
-        /distr/installer-console.v5 --config /distr/config/services.json
+        /distr/installer-console.v5 --config /config/services.json
     SHELL
   end
 
@@ -178,10 +188,10 @@ Vagrant.configure(2) do |config|
         v.cpus = SV_CONNECTORS_CPU
       end
       sv5connectors.vm.network "private_network", ip: CONNECTORS_IP_ARRAY[i - 1]
-      sv5connectors.vm.synced_folder "./distr/", "/distr"
       sv5connectors.vm.provision "shell", inline: <<-SHELL
+
           chmod +x /distr/installer-console.v5
-          /distr/installer-console.v5 --config /distr/config/connectors.json
+          /distr/installer-console.v5 --config /config/connectors.json
       SHELL
     end
   end
@@ -195,10 +205,10 @@ Vagrant.configure(2) do |config|
       v.cpus = SV_WEBPORTAL_CPU
     end
     sv5webportal.vm.network "private_network", ip: SV_WEBPORTAL_IP
-    sv5webportal.vm.synced_folder "./distr/", "/distr"
     sv5webportal.vm.provision "shell", inline: <<-SHELL
+
         chmod +x /distr/installer-console.v5
-        /distr/installer-console.v5 --config /distr/config/webportal.json
+        /distr/installer-console.v5 --config /config/webportal.json
     SHELL
   end
 
