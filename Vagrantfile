@@ -148,7 +148,7 @@ Vagrant.configure(2) do |config|
       v.cpus = SV_RABBITMQ_CPU
     end
     sv5rabbitmq.vm.network "private_network", ip: SV_RABBITMQ_IP
-    sv5services.vm.synced_folder "./distr/", "/distr"
+    sv5rabbitmq.vm.synced_folder "./distr/", "/distr"
     sv5rabbitmq.vm.provision "shell", inline: <<-SHELL
       dpkg -i /distr/redist/rabbit/*.deb
       rabbitmqctl add_user #{RABBITMQ_USER} #{RABBITMQ_PASSWORD}
