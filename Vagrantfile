@@ -3,8 +3,7 @@
 # vi: set ft=ruby :
 
 
-VM_BOX_UBUNTU = 'generic/ubuntu2204'
-VM_BOX_DEBIAN = 'generic/debian10'
+VM_BOX = 'generic/debian10'
 
 HA_PROXY_RAM = 2048
 HA_PROXY_CPU = 2
@@ -50,7 +49,7 @@ Vagrant.configure(2) do |config|
 
   (1..$count).each do |i|
     config.vm.define "pgnode#{i}" do |pgnode|
-      pgnode.vm.box = VM_BOX_DEBIAN
+      pgnode.vm.box = VM_BOX
       pgnode.vm.provider "virtualbox" do |v|
         v.name = "pg node #{i}"
         v.memory = DB_NODE_RAM
@@ -90,7 +89,7 @@ Vagrant.configure(2) do |config|
   end
 
   config.vm.define "haproxy" do |haproxy|
-    haproxy.vm.box = VM_BOX_DEBIAN
+    haproxy.vm.box = VM_BOX
     haproxy.vm.hostname = "haproxy"
     haproxy.vm.provider "virtualbox" do |v|
       v.name = "ha proxy"
@@ -112,7 +111,7 @@ Vagrant.configure(2) do |config|
   end
 
   config.vm.define "sv5elastic" do |sv5elastic|
-    sv5elastic.vm.box = VM_BOX_UBUNTU
+    sv5elastic.vm.box = VM_BOX
     sv5elastic.vm.hostname = "sv5elastic"
     sv5elastic.vm.provider "virtualbox" do |v|
       v.name = "sv5 elastic"
@@ -140,7 +139,7 @@ Vagrant.configure(2) do |config|
   end
 
   config.vm.define "sv5rabbitmq" do |sv5rabbitmq|
-    sv5rabbitmq.vm.box = VM_BOX_UBUNTU
+    sv5rabbitmq.vm.box = VM_BOX
     sv5rabbitmq.vm.hostname = "sv5rabbitmq"
     sv5rabbitmq.vm.provider "virtualbox" do |v|
       v.name = "sv5 rabbitmq"
@@ -159,7 +158,7 @@ Vagrant.configure(2) do |config|
   end
 
   config.vm.define "sv5services" do |sv5services|
-    sv5services.vm.box = VM_BOX_UBUNTU
+    sv5services.vm.box = VM_BOX
     sv5services.vm.hostname = 'sv5services'
     sv5services.vm.provider "virtualbox" do |v|
       v.name = "sv5 services"
@@ -184,7 +183,7 @@ Vagrant.configure(2) do |config|
 
   (1..$count).each do |i|
     config.vm.define "sv5connectors#{i}" do |sv5connectors|
-      sv5connectors.vm.box = VM_BOX_UBUNTU
+      sv5connectors.vm.box = VM_BOX
       sv5connectors.vm.hostname = "sv5connectors#{i}"
       sv5connectors.vm.provider "virtualbox" do |v|
         v.name = "sv5 connectors #{i}"
@@ -202,7 +201,7 @@ Vagrant.configure(2) do |config|
   end
 
   config.vm.define "sv5webportal" do |sv5webportal|
-    sv5webportal.vm.box = VM_BOX_UBUNTU
+    sv5webportal.vm.box = VM_BOX
     sv5webportal.vm.hostname = "sv5webportal"
     sv5webportal.vm.provider "virtualbox" do |v|
       v.name = "sv5 webportal"
