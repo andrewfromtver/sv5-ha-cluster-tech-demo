@@ -103,10 +103,10 @@ bootstrap:
     - locale: en_US.UTF8
     pg_hba:
     - host replication $POSTGRES_USER 127.0.0.1/32 md5
-    - host replication $POSTGRES_USER $PG_NODE_1_IP/32 md5
-    - host replication $POSTGRES_USER $PG_NODE_2_IP/32 md5
-    - host replication $POSTGRES_USER $PG_NODE_3_IP/32 md5
-    - host all $POSTGRES_USER $HA_PROXY_IP/32 md5
+    - host replication $POSTGRES_USER $PG_NODE_1_IP/0 md5
+    - host replication $POSTGRES_USER $PG_NODE_2_IP/0 md5
+    - host replication $POSTGRES_USER $PG_NODE_3_IP/0 md5
+    - host all $POSTGRES_USER $HA_PROXY_IP/0 md5
 
 postgresql:
     listen: $CURRENT_NODE_IP:5432
