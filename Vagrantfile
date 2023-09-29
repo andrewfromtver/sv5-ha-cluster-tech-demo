@@ -118,9 +118,9 @@ Vagrant.configure(2) do |config|
   (1..$elastic_count).each do |i|
     config.vm.define "sv5elastic" do |sv5elastic|
       sv5elastic.vm.box = VM_BOX
-      sv5elastic.vm.hostname = "sv5elastic"
+      sv5elastic.vm.hostname = "sv5elastic#{i}"
       sv5elastic.vm.provider "virtualbox" do |v|
-        v.name = "sv5 elastic"
+        v.name = "sv5 elastic #{i}"
         v.memory = SV_ELASTIC_RAM
         v.cpus = SV_ELASTIC_CPU
       end
@@ -131,8 +131,8 @@ Vagrant.configure(2) do |config|
         apt-get install -y gnupg2 apt-transport-https
         curl  -fsSL https://artifacts.elastic.co/GPG-KEY-elasticsearch | gpg --dearmor -o /etc/apt/trusted.gpg.d/elastic.gpg
         echo "deb https://artifacts.elastic.co/packages/oss-7.x/apt stable main" | sudo tee  /etc/apt/sources.list.d/elastic-7.x.list
-        apt update
-        apt install elasticsearch-oss
+        apt-get update
+        apt-get install -y elasticsearch-oss
         echo "network.host: "#{ELASTIC_IP_ARRAY[i - 1]} >> /etc/elasticsearch/elasticsearch.yml
         echo "discovery.seed_hosts: ["#{SV_WEBPORTAL_1_IP}","#{SV_WEBPORTAL_2_IP}"]" >> /etc/elasticsearch/elasticsearch.yml
         systemctl enable elasticsearch.service
@@ -149,9 +149,9 @@ Vagrant.configure(2) do |config|
   (1..$rabbit_count).each do |i|
     config.vm.define "sv5rabbitmq" do |sv5rabbitmq|
       sv5rabbitmq.vm.box = VM_BOX
-      sv5rabbitmq.vm.hostname = "sv5rabbitmq"
+      sv5rabbitmq.vm.hostname = "sv5rabbitmq#{i}"
       sv5rabbitmq.vm.provider "virtualbox" do |v|
-        v.name = "sv5 rabbitmq"
+        v.name = "sv5 rabbitmq #{i}"
         v.memory = SV_RABBITMQ_RAM
         v.cpus = SV_RABBITMQ_CPU
       end
@@ -165,7 +165,7 @@ Vagrant.configure(2) do |config|
         add-apt-repository 'deb http://www.rabbitmq.com/debian/ testing main'
         wget -O- https://www.rabbitmq.com/rabbitmq-release-signing-key.asc | apt-key add -
         apt-get update
-        apt-get install rabbitmq-server
+        apt-get install -y rabbitmq-server
         rabbitmqctl add_user #{RABBITMQ_USER} #{RABBITMQ_PASSWORD}
         rabbitmqctl set_user_tags #{RABBITMQ_USER} administrator
         rabbitmqctl set_permissions -p / #{RABBITMQ_USER} ".*" ".*" ".*"

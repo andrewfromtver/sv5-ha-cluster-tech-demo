@@ -37,7 +37,7 @@ ExecStart=/usr/bin/etcd \\
  --listen-client-urls http://${CURRENT_NODE_IP}:2379,http://127.0.0.1:2379 \\
  --advertise-client-urls http://${CURRENT_NODE_IP}:2379 \\
  --initial-cluster-token etcd-cluster-1 \\
- --initial-cluster pgnode1=http://${PG_NODE_1}:2380,pgnode2=http://${PG_NODE_2}:2380,pgnode3=http://${PG_NODE_3}:2380 \\
+ --initial-cluster pgnode1=http://${PG_NODE_1_IP}:2380,pgnode2=http://${PG_NODE_2_IP}:2380,pgnode3=http://${PG_NODE_3_IP}:2380 \\
  --initial-cluster-state new \\
  --heartbeat-interval 1000 \\
  --election-timeout 5000
@@ -78,7 +78,7 @@ restapi:
     connect_address: $CURRENT_NODE_IP:8008
 
 etcd:
-    hosts: [\"$PG_NODE_1:2379\", \"$PG_NODE_2:2379\", \"$PG_NODE_3:2379\"]
+    hosts: [\"$PG_NODE_1_IP:2379\", \"$PG_NODE_2_IP:2379\", \"$PG_NODE_3_IP:2379\"]
 
 bootstrap:
     dcs:
@@ -103,9 +103,9 @@ bootstrap:
     - locale: en_US.UTF8
     pg_hba:
     - host replication postgres 127.0.0.1/32 md5
-    - host replication postgres $PG_NODE_1/0 md5
-    - host replication postgres $PG_NODE_2/0 md5
-    - host replication postgres $PG_NODE_3/0 md5
+    - host replication postgres $PG_NODE_1_IP/0 md5
+    - host replication postgres $PG_NODE_2_IP/0 md5
+    - host replication postgres $PG_NODE_3_IP/0 md5
     - host all all $HA_PROXY_IP/0 md5
 
 postgresql:
