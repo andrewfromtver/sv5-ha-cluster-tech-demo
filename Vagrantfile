@@ -117,16 +117,16 @@ Vagrant.configure(2) do |config|
   ELASTIC_IP_ARRAY = [ELASTIC_1_IP, ELASTIC_2_IP]
 
   (1..$elastic_count).each do |i|
-    config.vm.define "sv5elastic#{i}" do |sv5elastic|
-      sv5elastic.vm.box = VM_BOX
-      sv5elastic.vm.hostname = "sv5elastic#{i}"
-      sv5elastic.vm.provider "virtualbox" do |v|
-        v.name = "sv5 elastic #{i}"
+    config.vm.define "elastic#{i}" do |elastic|
+      elastic.vm.box = VM_BOX
+      elastic.vm.hostname = "elastic#{i}"
+      elastic.vm.provider "virtualbox" do |v|
+        v.name = "elasticsearch #{i}"
         v.memory = SV_ELASTIC_RAM
         v.cpus = SV_ELASTIC_CPU
       end
-      sv5elastic.vm.network "private_network", ip: ELASTIC_IP_ARRAY[i - 1]
-      sv5elastic.vm.provision "shell", inline: <<-SHELL
+      elastic.vm.network "private_network", ip: ELASTIC_IP_ARRAY[i - 1]
+      elastic.vm.provision "shell", inline: <<-SHELL
         apt-get update
         apt-get install -y gnupg2 apt-transport-https
         curl  -fsSL https://artifacts.elastic.co/GPG-KEY-elasticsearch | gpg --dearmor -o /etc/apt/trusted.gpg.d/elastic.gpg
@@ -134,7 +134,7 @@ Vagrant.configure(2) do |config|
         apt-get update
         apt-get install -y elasticsearch-oss
         echo "network.host: "#{ELASTIC_IP_ARRAY[i - 1]} >> /etc/elasticsearch/elasticsearch.yml
-        echo "discovery.seed_hosts: ["#{HA_PROXY_IP}","#{SV_WEBPORTAL_1_IP}","#{SV_WEBPORTAL_2_IP}"]" >> /etc/elasticsearch/elasticsearch.yml
+        echo "discovery.seed_hosts: ["#{SV_WEBPORTAL_1_IP}","#{SV_WEBPORTAL_2_IP}"]" >> /etc/elasticsearch/elasticsearch.yml
         systemctl enable elasticsearch.service
         systemctl start elasticsearch.service
         systemctl status elasticsearch.service
@@ -147,16 +147,16 @@ Vagrant.configure(2) do |config|
   RABBIT_IP_ARRAY = [RABBITMQ_1_IP, RABBITMQ_2_IP]
 
   (1..$rabbit_count).each do |i|
-    config.vm.define "sv5rabbitmq#{i}" do |sv5rabbitmq|
-      sv5rabbitmq.vm.box = VM_BOX
-      sv5rabbitmq.vm.hostname = "sv5rabbitmq#{i}"
-      sv5rabbitmq.vm.provider "virtualbox" do |v|
-        v.name = "sv5 rabbitmq #{i}"
+    config.vm.define "rabbitmq#{i}" do |rabbitmq|
+      rabbitmq.vm.box = VM_BOX
+      rabbitmq.vm.hostname = "rabbitmq#{i}"
+      rabbitmq.vm.provider "virtualbox" do |v|
+        v.name = "rabbitmq #{i}"
         v.memory = SV_RABBITMQ_RAM
         v.cpus = SV_RABBITMQ_CPU
       end
-      sv5rabbitmq.vm.network "private_network", ip: RABBIT_IP_ARRAY[i - 1]
-      sv5rabbitmq.vm.provision "shell", inline: <<-SHELL
+      rabbitmq.vm.network "private_network", ip: RABBIT_IP_ARRAY[i - 1]
+      rabbitmq.vm.provision "shell", inline: <<-SHELL
         add-apt-repository 'deb http://www.rabbitmq.com/debian/ testing main'
         wget -O- https://www.rabbitmq.com/rabbitmq-release-signing-key.asc | apt-key add -
         apt-get update
@@ -185,14 +185,20 @@ Vagrant.configure(2) do |config|
       sv5services.vm.network "private_network", ip: SV_SERVICES_IP_ARRAY[i - 1]
       sv5services.vm.synced_folder "./config/", "/config"
       sv5services.vm.synced_folder "./distr/", "/distr"
-      sv5services.vm.provision "shell", path: "downloader.sh", env: {
-        "NEXUS_LOGIN" => ENV["NEXUS_LOGIN"],
-        "NEXUS_PASSWORD" => ENV["NEXUS_PASSWORD"],
-        "NEXUS_URL" => ENV["NEXUS_URL"],
-        "NEXUS_FILE" => "SecurityVisionPlatform-console.v5",
-        "FILE_PATH" => "/distr/installer-console.v5"
-      }
+      sv5services.trigger.after :up do
+        if(i == 1) then
+          sv5services.vm.provision "shell", path: "downloader.sh", env: {
+            "NEXUS_LOGIN" => ENV["NEXUS_LOGIN"],
+            "NEXUS_PASSWORD" => ENV["NEXUS_PASSWORD"],
+            "NEXUS_URL" => ENV["NEXUS_URL"],
+            "NEXUS_FILE" => "SecurityVisionPlatform-console.v5",
+            "FILE_PATH" => "/distr/installer-console.v5"
+          }
+        end
+      end
       sv5services.vm.provision "shell", inline: <<-SHELL
+        apt-get update
+        apt-get install -y nginx
         chmod +x /distr/installer-console.v5
         /distr/installer-console.v5 --config /config/services.json
       SHELL
@@ -215,6 +221,8 @@ Vagrant.configure(2) do |config|
       sv5webportal.vm.synced_folder "./config/", "/config"
       sv5webportal.vm.synced_folder "./distr/", "/distr"
       sv5webportal.vm.provision "shell", inline: <<-SHELL
+          apt-get update
+          apt-get install -y nginx
           chmod +x /distr/installer-console.v5
           /distr/installer-console.v5 --config /config/webportal.json
       SHELL
