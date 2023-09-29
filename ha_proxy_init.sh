@@ -26,9 +26,9 @@ listen sv5postgres
   bind *:5432
   http-check expect status 200
   default-server inter 3s fall 3 rise 2 on-marked-down shutdown-sessions
-  server pgnode1 $PG_NODE_1:5432 maxconn 100 check port 8008
-  server pgnode2 $PG_NODE_2:5432 maxconn 100 check port 8008
-  server pgnode3 $PG_NODE_3:5432 maxconn 100 check port 8008
+  server pgnode1 $PG_NODE_1_IP:5432 maxconn 100 check port 8008
+  server pgnode2 $PG_NODE_2_IP:5432 maxconn 100 check port 8008
+  server pgnode3 $PG_NODE_3_IP:5432 maxconn 100 check port 8008
 
 listen sv5elastic
   bind *:9200
