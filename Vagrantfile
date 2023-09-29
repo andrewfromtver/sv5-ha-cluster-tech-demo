@@ -144,7 +144,7 @@ Vagrant.configure(2) do |config|
 
 
   $rabbit_count = 2
-  RABBIT_IP_ARRAY = [RABBIT_1_IP, RABBIT_2_IP]
+  RABBIT_IP_ARRAY = [RABBITMQ_1_IP, RABBITMQ_2_IP]
 
   (1..$rabbit_count).each do |i|
     config.vm.define "sv5rabbitmq" do |sv5rabbitmq|
@@ -175,7 +175,6 @@ Vagrant.configure(2) do |config|
     end
   end
 
-
   # config.vm.define "sv5services" do |sv5services|
   #   sv5services.vm.box = VM_BOX
   #   sv5services.vm.hostname = 'sv5services'
@@ -199,7 +198,6 @@ Vagrant.configure(2) do |config|
   #     /distr/installer-console.v5 --config /config/services.json
   #   SHELL
   # end
-
 
   # config.vm.define "sv5webportal" do |sv5webportal|
   #   sv5webportal.vm.box = VM_BOX
