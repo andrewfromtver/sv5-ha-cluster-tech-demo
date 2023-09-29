@@ -44,50 +44,50 @@ ETCD_CLUSTER_TOKEN = "etcdtesttoken"
 
 Vagrant.configure(2) do |config|
 
-  # $pg_count = 3
-  # PG_IP_ARRAY = [PG_NODE_1_IP, PG_NODE_2_IP, PG_NODE_3_IP]
+  $pg_count = 3
+  PG_IP_ARRAY = [PG_NODE_1_IP, PG_NODE_2_IP, PG_NODE_3_IP]
 
-  # (1..$pg_count).each do |i|
-  #   config.vm.define "pgnode#{i}" do |pgnode|
-  #     pgnode.vm.box = VM_BOX
-  #     pgnode.vm.provider "virtualbox" do |v|
-  #       v.name = "pg node #{i}"
-  #       v.memory = DB_NODE_RAM
-  #       v.cpus = DB_NODE_CPU
-  #     end
-  #     pgnode.vm.hostname = "pgnode#{i}"
-  #     pgnode.vm.network "private_network", ip: PG_IP_ARRAY[i - 1]
-  #     pgnode.vm.provision "shell", path: 'db_node_init.sh', env: {
-  #       "NODE_NAME" => "pgnode#{i}",
-  #       "ETCD_CLUSTER_TOKEN" => ETCD_CLUSTER_TOKEN,
-  #       "POSTGRES_MAJOR_VERSION" => POSTGRES_MAJOR_VERSION,
-  #       "POSTGRES_USER" => POSTGRES_USER,
-  #       "POSTGRES_PASSWORD" => POSTGRES_PASSWORD,
-  #       "HA_PROXY_IP" => HA_PROXY_IP,
-  #       "PG_NODE_1_IP" => PG_NODE_1_IP,
-  #       "PG_NODE_2_IP" => PG_NODE_2_IP,
-  #       "PG_NODE_3_IP" => PG_NODE_3_IP,
-  #       "CURRENT_NODE_IP" => PG_IP_ARRAY[i - 1]
-  #     }
-  #     pgnode.trigger.after :up do
-  #       if(i <= $pg_count) then
-  #         pgnode.vm.provision "shell", run: 'always', inline: <<-SHELL
-  #           systemctl enable etcd &
-  #           systemctl start etcd &
-  #           systemctl enable patroni &
-  #           systemctl start patroni &
-  #         SHELL
-  #       end
-  #       if(i == $pg_count) then
-  #         pgnode.vm.provision "shell", run: 'always', inline: <<-SHELL
-  #           # check cluster status
-  #           etcdctl member list
-  #           patronictl -c /etc/patroni.yml list
-  #         SHELL
-  #       end
-  #     end
-  #   end
-  # end
+  (1..$pg_count).each do |i|
+    config.vm.define "pgnode#{i}" do |pgnode|
+      pgnode.vm.box = VM_BOX
+      pgnode.vm.provider "virtualbox" do |v|
+        v.name = "pg node #{i}"
+        v.memory = DB_NODE_RAM
+        v.cpus = DB_NODE_CPU
+      end
+      pgnode.vm.hostname = "pgnode#{i}"
+      pgnode.vm.network "private_network", ip: PG_IP_ARRAY[i - 1]
+      pgnode.vm.provision "shell", path: 'db_node_init.sh', env: {
+        "NODE_NAME" => "pgnode#{i}",
+        "ETCD_CLUSTER_TOKEN" => ETCD_CLUSTER_TOKEN,
+        "POSTGRES_MAJOR_VERSION" => POSTGRES_MAJOR_VERSION,
+        "POSTGRES_USER" => POSTGRES_USER,
+        "POSTGRES_PASSWORD" => POSTGRES_PASSWORD,
+        "HA_PROXY_IP" => HA_PROXY_IP,
+        "PG_NODE_1_IP" => PG_NODE_1_IP,
+        "PG_NODE_2_IP" => PG_NODE_2_IP,
+        "PG_NODE_3_IP" => PG_NODE_3_IP,
+        "CURRENT_NODE_IP" => PG_IP_ARRAY[i - 1]
+      }
+      pgnode.trigger.after :up do
+        if(i <= $pg_count) then
+          pgnode.vm.provision "shell", run: 'always', inline: <<-SHELL
+            systemctl enable etcd &
+            systemctl start etcd &
+            systemctl enable patroni &
+            systemctl start patroni &
+          SHELL
+        end
+        if(i == $pg_count) then
+          pgnode.vm.provision "shell", run: 'always', inline: <<-SHELL
+            # check cluster status
+            etcdctl member list
+            patronictl -c /etc/patroni.yml list
+          SHELL
+        end
+      end
+    end
+  end
 
   config.vm.define "haproxy" do |haproxy|
     haproxy.vm.box = VM_BOX
@@ -113,34 +113,34 @@ Vagrant.configure(2) do |config|
     }
   end
 
-  # $elastic_count = 2
-  # ELASTIC_IP_ARRAY = [ELASTIC_1_IP, ELASTIC_2_IP]
+  $elastic_count = 2
+  ELASTIC_IP_ARRAY = [ELASTIC_1_IP, ELASTIC_2_IP]
 
-  # (1..$elastic_count).each do |i|
-  #   config.vm.define "sv5elastic#{i}" do |sv5elastic|
-  #     sv5elastic.vm.box = VM_BOX
-  #     sv5elastic.vm.hostname = "sv5elastic#{i}"
-  #     sv5elastic.vm.provider "virtualbox" do |v|
-  #       v.name = "sv5 elastic #{i}"
-  #       v.memory = SV_ELASTIC_RAM
-  #       v.cpus = SV_ELASTIC_CPU
-  #     end
-  #     sv5elastic.vm.network "private_network", ip: ELASTIC_IP_ARRAY[i - 1]
-  #     sv5elastic.vm.provision "shell", inline: <<-SHELL
-  #       apt-get update
-  #       apt-get install -y gnupg2 apt-transport-https
-  #       curl  -fsSL https://artifacts.elastic.co/GPG-KEY-elasticsearch | gpg --dearmor -o /etc/apt/trusted.gpg.d/elastic.gpg
-  #       echo "deb https://artifacts.elastic.co/packages/oss-7.x/apt stable main" | sudo tee  /etc/apt/sources.list.d/elastic-7.x.list
-  #       apt-get update
-  #       apt-get install -y elasticsearch-oss
-  #       echo "network.host: "#{ELASTIC_IP_ARRAY[i - 1]} >> /etc/elasticsearch/elasticsearch.yml
-  #       echo "discovery.seed_hosts: ["#{HA_PROXY_IP}","#{SV_WEBPORTAL_1_IP}","#{SV_WEBPORTAL_2_IP}"]" >> /etc/elasticsearch/elasticsearch.yml
-  #       systemctl enable elasticsearch.service
-  #       systemctl start elasticsearch.service
-  #       systemctl status elasticsearch.service
-  #     SHELL
-  #   end
-  # end
+  (1..$elastic_count).each do |i|
+    config.vm.define "sv5elastic#{i}" do |sv5elastic|
+      sv5elastic.vm.box = VM_BOX
+      sv5elastic.vm.hostname = "sv5elastic#{i}"
+      sv5elastic.vm.provider "virtualbox" do |v|
+        v.name = "sv5 elastic #{i}"
+        v.memory = SV_ELASTIC_RAM
+        v.cpus = SV_ELASTIC_CPU
+      end
+      sv5elastic.vm.network "private_network", ip: ELASTIC_IP_ARRAY[i - 1]
+      sv5elastic.vm.provision "shell", inline: <<-SHELL
+        apt-get update
+        apt-get install -y gnupg2 apt-transport-https
+        curl  -fsSL https://artifacts.elastic.co/GPG-KEY-elasticsearch | gpg --dearmor -o /etc/apt/trusted.gpg.d/elastic.gpg
+        echo "deb https://artifacts.elastic.co/packages/oss-7.x/apt stable main" | sudo tee  /etc/apt/sources.list.d/elastic-7.x.list
+        apt-get update
+        apt-get install -y elasticsearch-oss
+        echo "network.host: "#{ELASTIC_IP_ARRAY[i - 1]} >> /etc/elasticsearch/elasticsearch.yml
+        echo "discovery.seed_hosts: ["#{HA_PROXY_IP}","#{SV_WEBPORTAL_1_IP}","#{SV_WEBPORTAL_2_IP}"]" >> /etc/elasticsearch/elasticsearch.yml
+        systemctl enable elasticsearch.service
+        systemctl start elasticsearch.service
+        systemctl status elasticsearch.service
+      SHELL
+    end
+  end
 
 
   $rabbit_count = 2
@@ -170,54 +170,55 @@ Vagrant.configure(2) do |config|
     end
   end
 
+  $services_count = 2
+  SV_SERVICES_IP_ARRAY = [SV_SERVICES_1_IP, SV_SERVICES_2_IP]
 
+  (1..$services_count).each do |i|
+    config.vm.define "sv5services#{i}" do |sv5services|
+      sv5services.vm.box = VM_BOX
+      sv5services.vm.hostname = "sv5services#{i}"
+      sv5services.vm.provider "virtualbox" do |v|
+        v.name = "sv5 services #{i}"
+        v.memory = SV_SERVICES_RAM
+        v.cpus = SV_SERVICES_CPU
+      end
+      sv5services.vm.network "private_network", ip: SV_SERVICES_IP_ARRAY[i - 1]
+      sv5services.vm.synced_folder "./config/", "/config"
+      sv5services.vm.synced_folder "./distr/", "/distr"
+      sv5services.vm.provision "shell", path: "downloader.sh", env: {
+        "NEXUS_LOGIN" => ENV["NEXUS_LOGIN"],
+        "NEXUS_PASSWORD" => ENV["NEXUS_PASSWORD"],
+        "NEXUS_URL" => ENV["NEXUS_URL"],
+        "NEXUS_FILE" => "SecurityVisionPlatform-console.v5",
+        "FILE_PATH" => "/distr/installer-console.v5"
+      }
+      sv5services.vm.provision "shell", inline: <<-SHELL
+        chmod +x /distr/installer-console.v5
+        /distr/installer-console.v5 --config /config/services.json
+      SHELL
+    end
+  end
 
+  $webportal_count = 2
+  SV_WEBPORTAL_IP_ARRAY = [SV_WEBPORTAL_1_IP, SV_WEBPORTAL_2_IP]
 
-
-
-
-
-
-
-  # config.vm.define "sv5services" do |sv5services|
-  #   sv5services.vm.box = VM_BOX
-  #   sv5services.vm.hostname = 'sv5services'
-  #   sv5services.vm.provider "virtualbox" do |v|
-  #     v.name = "sv5 services"
-  #     v.memory = SV_SERVICES_RAM
-  #     v.cpus = SV_SERVICES_CPU
-  #   end
-  #   sv5services.vm.network "private_network", ip: SV_SERVICES_1_IP
-  #   sv5services.vm.synced_folder "./config/", "/config"
-  #   sv5services.vm.synced_folder "./distr/", "/distr"
-  #   sv5services.vm.provision "shell", path: "downloader.sh", env: {
-  #     "NEXUS_LOGIN" => ENV["NEXUS_LOGIN"],
-  #     "NEXUS_PASSWORD" => ENV["NEXUS_PASSWORD"],
-  #     "NEXUS_URL" => ENV["NEXUS_URL"],
-  #     "NEXUS_FILE" => "SecurityVisionPlatform-console.v5",
-  #     "FILE_PATH" => "/distr/installer-console.v5"
-  #   }
-  #   sv5services.vm.provision "shell", inline: <<-SHELL
-  #     chmod +x /distr/installer-console.v5
-  #     /distr/installer-console.v5 --config /config/services.json
-  #   SHELL
-  # end
-
-  # config.vm.define "sv5webportal" do |sv5webportal|
-  #   sv5webportal.vm.box = VM_BOX
-  #   sv5webportal.vm.hostname = "sv5webportal"
-  #   sv5webportal.vm.provider "virtualbox" do |v|
-  #     v.name = "sv5 webportal"
-  #     v.memory = SV_WEBPORTAL_RAM
-  #     v.cpus = SV_WEBPORTAL_CPU
-  #   end
-  #   sv5webportal.vm.network "private_network", ip: SV_WEBPORTAL_1_IP
-  #   sv5webportal.vm.synced_folder "./config/", "/config"
-  #   sv5webportal.vm.synced_folder "./distr/", "/distr"
-  #   sv5webportal.vm.provision "shell", inline: <<-SHELL
-  #       chmod +x /distr/installer-console.v5
-  #       /distr/installer-console.v5 --config /config/webportal.json
-  #   SHELL
-  # end
+  (1..$webportal_count).each do |i|
+    config.vm.define "sv5webportal#{i}" do |sv5webportal|
+      sv5webportal.vm.box = VM_BOX
+      sv5webportal.vm.hostname = "sv5webportal#{i}"
+      sv5webportal.vm.provider "virtualbox" do |v|
+        v.name = "sv5 webportal #{i}"
+        v.memory = SV_WEBPORTAL_RAM
+        v.cpus = SV_WEBPORTAL_CPU
+      end
+      sv5webportal.vm.network "private_network", ip: SV_WEBPORTAL_IP_ARRAY[i - 1]
+      sv5webportal.vm.synced_folder "./config/", "/config"
+      sv5webportal.vm.synced_folder "./distr/", "/distr"
+      sv5webportal.vm.provision "shell", inline: <<-SHELL
+          chmod +x /distr/installer-console.v5
+          /distr/installer-console.v5 --config /config/webportal.json
+      SHELL
+    end
+  end
 
 end
