@@ -41,6 +41,14 @@
 		},
 		{
 			"jType": "Service",
+			"serviceKey": "connectors",
+			"runAccount": {
+				"type": "New",
+				"username": "sv"
+			}
+		},
+		{
+			"jType": "Service",
 			"serviceKey": "processing",
 			"runAccount": {
 				"type": "New",

@@ -5,8 +5,8 @@
 
 VM_BOX = 'generic/debian10'
 
-HA_PROXY_RAM = 2048
-HA_PROXY_CPU = 2
+HA_PROXY_RAM = 1024
+HA_PROXY_CPU = 1
 DB_NODE_RAM = 2048
 DB_NODE_CPU = 2
 SV_ELASTIC_RAM = 2048
@@ -15,27 +15,28 @@ SV_RABBITMQ_RAM = 2048
 SV_RABBITMQ_CPU = 2
 SV_SERVICES_RAM = 2048
 SV_SERVICES_CPU = 2
-SV_CONNECTORS_RAM = 2048
-SV_CONNECTORS_CPU = 2
-SV_WEBPORTAL_RAM = 2048
-SV_WEBPORTAL_CPU = 2
+SV_WEBPORTAL_RAM = 1024
+SV_WEBPORTAL_CPU = 1
 
 HA_PROXY_IP = "192.168.56.110"
-MASTER_IP = "192.168.56.111"
-SLAVE_1_IP = "192.168.56.112"
-SLAVE_2_IP = "192.168.56.113"
-SV_ELASTIC_IP = "192.168.56.114"
-SV_RABBITMQ_IP = "192.168.56.115"
-SV_SERVICES_IP = "192.168.56.116"
-SV_CONNECTORS_1_IP = "192.168.56.117"
-SV_CONNECTORS_2_IP = "192.168.56.118"
-SV_CONNECTORS_3_IP = "192.168.56.119"
-SV_WEBPORTAL_IP = "192.168.56.120"
+PG_NODE_1_IP = "192.168.56.111"
+PG_NODE_2_IP = "192.168.56.112"
+PG_NODE_3_IP = "192.168.56.113"
+ELASTIC_1_IP = "192.168.56.114"
+ELASTIC_2_IP = "192.168.56.115"
+RABBITMQ_1_IP = "192.168.56.116"
+RABBITMQ_2_IP = "192.168.56.117"
+SV_SERVICES_1_IP = "192.168.56.118"
+SV_SERVICES_2_IP = "192.168.56.119"
+SV_WEBPORTAL_1_IP = "192.168.56.120"
+SV_WEBPORTAL_2_IP = "192.168.56.121"
 
 POSTGRES_MAJOR_VERSION = 14
-POSTGRES_PASSWORD = "sv5password"
-
 RABBITMQ_USER = "user"
+POSTGRES_PASSWORD = "sv5password"
+POSTGRES_DATABASE = "SecurityVision"
+
+RABBITMQ_USER="sv5user"
 RABBITMQ_PASSWORD = "sv5password"
 
 ETCD_CLUSTER_TOKEN = "etcdtesttoken"
@@ -43,11 +44,10 @@ ETCD_CLUSTER_TOKEN = "etcdtesttoken"
 
 Vagrant.configure(2) do |config|
 
-  $count = 3
-  PG_IP_ARRAY = [MASTER_IP, SLAVE_1_IP, SLAVE_2_IP]
-  CONNECTORS_IP_ARRAY = [SV_CONNECTORS_1_IP, SV_CONNECTORS_2_IP, SV_CONNECTORS_3_IP]
+  $pg_count = 3
+  PG_IP_ARRAY = [PG_NODE_1_IP, PG_NODE_2_IP, PG_NODE_3_IP]
 
-  (1..$count).each do |i|
+  (1..$pg_count).each do |i|
     config.vm.define "pgnode#{i}" do |pgnode|
       pgnode.vm.box = VM_BOX
       pgnode.vm.provider "virtualbox" do |v|
@@ -63,13 +63,13 @@ Vagrant.configure(2) do |config|
         "POSTGRES_MAJOR_VERSION" => POSTGRES_MAJOR_VERSION,
         "POSTGRES_PASSWORD" => POSTGRES_PASSWORD,
         "HA_PROXY_IP" => HA_PROXY_IP,
-        "MASTER_IP" => MASTER_IP,
-        "SLAVE_1_IP" => SLAVE_1_IP,
-        "SLAVE_2_IP" => SLAVE_2_IP,
+        "PG_NODE_1_IP" => PG_NODE_1_IP,
+        "PG_NODE_2_IP" => PG_NODE_2_IP,
+        "PG_NODE_3_IP" => PG_NODE_3_IP,
         "CURRENT_NODE_IP" => PG_IP_ARRAY[i - 1]
       }
       pgnode.trigger.after :up do
-        if(i <= $count) then
+        if(i <= $pg_count) then
           pgnode.vm.provision "shell", run: 'always', inline: <<-SHELL
             systemctl enable etcd &
             systemctl start etcd &
@@ -77,7 +77,7 @@ Vagrant.configure(2) do |config|
             systemctl start patroni &
           SHELL
         end
-        if(i == $count) then
+        if(i == $pg_count) then
           pgnode.vm.provision "shell", run: 'always', inline: <<-SHELL
             # check cluster status
             etcdctl member list
@@ -98,123 +98,124 @@ Vagrant.configure(2) do |config|
     end
     haproxy.vm.network "private_network", ip: HA_PROXY_IP
     haproxy.vm.provision "shell", path: "ha_proxy_init.sh", env: {
-      "MASTER_IP" => MASTER_IP,
-      "SLAVE_1_IP" => SLAVE_1_IP,
-      "SLAVE_2_IP" => SLAVE_2_IP,
-      "SV_ELASTIC_IP" => SV_ELASTIC_IP,
-      "SV_RABBITMQ_IP" => SV_RABBITMQ_IP,
-      "SV_CONNECTORS_1_IP" => SV_CONNECTORS_1_IP,
-      "SV_CONNECTORS_2_IP" => SV_CONNECTORS_2_IP,
-      "SV_CONNECTORS_3_IP" => SV_CONNECTORS_3_IP,
-      "SV_WEBPORTAL_IP" => SV_WEBPORTAL_IP
+      "PG_NODE_1_IP" => PG_NODE_1_IP,
+      "PG_NODE_2_IP" => PG_NODE_2_IP,
+      "PG_NODE_3_IP" => PG_NODE_3_IP,
+      "ELASTIC_1_IP" => ELASTIC_1_IP,
+      "ELASTIC_2_IP" => ELASTIC_2_IP,
+      "RABBITMQ_1_IP" => RABBITMQ_1_IP,
+      "RABBITMQ_2_IP" => RABBITMQ_2_IP,
+      "SV_SERVICES_1_IP" => SV_SERVICES_1_IP,
+      "SV_SERVICES_2_IP" => SV_SERVICES_2_IP,
+      "SV_WEBPORTAL_1_IP" => SV_WEBPORTAL_1_IP,
+      "SV_WEBPORTAL_2_IP" => SV_WEBPORTAL_2_IP
     }
   end
 
-  config.vm.define "sv5elastic" do |sv5elastic|
-    sv5elastic.vm.box = VM_BOX
-    sv5elastic.vm.hostname = "sv5elastic"
-    sv5elastic.vm.provider "virtualbox" do |v|
-      v.name = "sv5 elastic"
-      v.memory = SV_ELASTIC_RAM
-      v.cpus = SV_ELASTIC_CPU
-    end
-    sv5elastic.vm.network "private_network", ip: SV_ELASTIC_IP
-    sv5elastic.vm.synced_folder "./distr/", "/distr"
-    sv5elastic.vm.provision "shell", path: "downloader.sh", env: {
-      "NEXUS_LOGIN" => ENV["NEXUS_LOGIN"],
-      "NEXUS_PASSWORD" => ENV["NEXUS_PASSWORD"],
-      "NEXUS_URL" => ENV["NEXUS_URL"],
-      "NEXUS_FILE" => "redist.tar.gz",
-      "FILE_PATH" => "/distr/redist.tar.gz"
-    }
-    sv5elastic.vm.provision "shell", inline: <<-SHELL
-      tar -xvf /distr/redist.tar.gz -C /distr/
-      dpkg -i /distr/redist/elastic/*.deb
-      echo "network.host: 192.168.56.114" >> /etc/elasticsearch/elasticsearch.yml
-      echo "discovery.seed_hosts: [192.168.56.110]" >> /etc/elasticsearch/elasticsearch.yml
-      systemctl enable elasticsearch.service
-      systemctl start elasticsearch.service
-      systemctl status elasticsearch.service
-    SHELL
-  end
+  $elastic_count = 2
+  ELASTIC_IP_ARRAY = [ELASTIC_1_IP, ELASTIC_2_IP]
 
-  config.vm.define "sv5rabbitmq" do |sv5rabbitmq|
-    sv5rabbitmq.vm.box = VM_BOX
-    sv5rabbitmq.vm.hostname = "sv5rabbitmq"
-    sv5rabbitmq.vm.provider "virtualbox" do |v|
-      v.name = "sv5 rabbitmq"
-      v.memory = SV_RABBITMQ_RAM
-      v.cpus = SV_RABBITMQ_CPU
-    end
-    sv5rabbitmq.vm.network "private_network", ip: SV_RABBITMQ_IP
-    sv5rabbitmq.vm.synced_folder "./distr/", "/distr"
-    sv5rabbitmq.vm.provision "shell", inline: <<-SHELL
-      dpkg -i /distr/redist/rabbitmq/*.deb
-      rabbitmqctl add_user #{RABBITMQ_USER} #{RABBITMQ_PASSWORD}
-      rabbitmqctl set_user_tags #{RABBITMQ_USER} administrator
-      rabbitmqctl set_permissions -p / #{RABBITMQ_USER} ".*" ".*" ".*"
-      rabbitmqctl authenticate_user #{RABBITMQ_USER} #{RABBITMQ_PASSWORD}
-    SHELL
-  end
-
-  config.vm.define "sv5services" do |sv5services|
-    sv5services.vm.box = VM_BOX
-    sv5services.vm.hostname = 'sv5services'
-    sv5services.vm.provider "virtualbox" do |v|
-      v.name = "sv5 services"
-      v.memory = SV_SERVICES_RAM
-      v.cpus = SV_SERVICES_CPU
-    end
-    sv5services.vm.network "private_network", ip: SV_SERVICES_IP
-    sv5services.vm.synced_folder "./config/", "/config"
-    sv5services.vm.synced_folder "./distr/", "/distr"
-    sv5services.vm.provision "shell", path: "downloader.sh", env: {
-      "NEXUS_LOGIN" => ENV["NEXUS_LOGIN"],
-      "NEXUS_PASSWORD" => ENV["NEXUS_PASSWORD"],
-      "NEXUS_URL" => ENV["NEXUS_URL"],
-      "NEXUS_FILE" => "SecurityVisionPlatform-console.v5",
-      "FILE_PATH" => "/distr/installer-console.v5"
-    }
-    sv5services.vm.provision "shell", inline: <<-SHELL
-      chmod +x /distr/installer-console.v5
-      /distr/installer-console.v5 --config /config/services.json
-    SHELL
-  end
-
-  (1..$count).each do |i|
-    config.vm.define "sv5connectors#{i}" do |sv5connectors|
-      sv5connectors.vm.box = VM_BOX
-      sv5connectors.vm.hostname = "sv5connectors#{i}"
-      sv5connectors.vm.provider "virtualbox" do |v|
-        v.name = "sv5 connectors #{i}"
-        v.memory = SV_CONNECTORS_RAM
-        v.cpus = SV_CONNECTORS_CPU
+  (1..$elastic_count).each do |i|
+    config.vm.define "sv5elastic" do |sv5elastic|
+      sv5elastic.vm.box = VM_BOX
+      sv5elastic.vm.hostname = "sv5elastic"
+      sv5elastic.vm.provider "virtualbox" do |v|
+        v.name = "sv5 elastic"
+        v.memory = SV_ELASTIC_RAM
+        v.cpus = SV_ELASTIC_CPU
       end
-      sv5connectors.vm.network "private_network", ip: CONNECTORS_IP_ARRAY[i - 1]
-      sv5connectors.vm.synced_folder "./config/", "/config"
-      sv5connectors.vm.synced_folder "./distr/", "/distr"
-      sv5connectors.vm.provision "shell", inline: <<-SHELL
-          chmod +x /distr/installer-console.v5
-          /distr/installer-console.v5 --config /config/connectors.json
+      sv5elastic.vm.network "private_network", ip: ELASTIC_IP_ARRAY[i - 1]
+      sv5elastic.vm.synced_folder "./distr/", "/distr"
+      sv5elastic.vm.provision "shell", inline: <<-SHELL
+        apt-get update
+        apt-get install -y gnupg2 apt-transport-https
+        curl  -fsSL https://artifacts.elastic.co/GPG-KEY-elasticsearch | gpg --dearmor -o /etc/apt/trusted.gpg.d/elastic.gpg
+        echo "deb https://artifacts.elastic.co/packages/oss-7.x/apt stable main" | sudo tee  /etc/apt/sources.list.d/elastic-7.x.list
+        apt update
+        apt install elasticsearch-oss
+        echo "network.host: "#{ELASTIC_IP_ARRAY[i - 1]} >> /etc/elasticsearch/elasticsearch.yml
+        echo "discovery.seed_hosts: ["#{SV_WEBPORTAL_1_IP}","#{SV_WEBPORTAL_2_IP}"]" >> /etc/elasticsearch/elasticsearch.yml
+        systemctl enable elasticsearch.service
+        systemctl start elasticsearch.service
+        systemctl status elasticsearch.service
       SHELL
     end
   end
 
-  config.vm.define "sv5webportal" do |sv5webportal|
-    sv5webportal.vm.box = VM_BOX
-    sv5webportal.vm.hostname = "sv5webportal"
-    sv5webportal.vm.provider "virtualbox" do |v|
-      v.name = "sv5 webportal"
-      v.memory = SV_WEBPORTAL_RAM
-      v.cpus = SV_WEBPORTAL_CPU
+
+  $rabbit_count = 2
+  RABBIT_IP_ARRAY = [SV_RABBIT_1_IP, SV_RABBIT_2_IP]
+
+  (1..$rabbit_count).each do |i|
+    config.vm.define "sv5rabbitmq" do |sv5rabbitmq|
+      sv5rabbitmq.vm.box = VM_BOX
+      sv5rabbitmq.vm.hostname = "sv5rabbitmq"
+      sv5rabbitmq.vm.provider "virtualbox" do |v|
+        v.name = "sv5 rabbitmq"
+        v.memory = SV_RABBITMQ_RAM
+        v.cpus = SV_RABBITMQ_CPU
+      end
+      sv5rabbitmq.vm.network "private_network", ip: RABBIT_IP_ARRAY[i - 1]
+      sv5rabbitmq.vm.synced_folder "./distr/", "/distr"
+      sv5rabbitmq.vm.provision "shell", inline: <<-SHELL
+        wget https://packages.erlang-solutions.com/erlang-solutions_1.0_all.deb
+        dpkg -i erlang-solutions_1.0_all.deb
+        apt-get update
+        apt-get install -y erlang erlang-nox
+        add-apt-repository 'deb http://www.rabbitmq.com/debian/ testing main'
+        wget -O- https://www.rabbitmq.com/rabbitmq-release-signing-key.asc | apt-key add -
+        apt-get update
+        apt-get install rabbitmq-server
+        rabbitmqctl add_user #{RABBITMQ_USER} #{RABBITMQ_PASSWORD}
+        rabbitmqctl set_user_tags #{RABBITMQ_USER} administrator
+        rabbitmqctl set_permissions -p / #{RABBITMQ_USER} ".*" ".*" ".*"
+        rabbitmqctl authenticate_user #{RABBITMQ_USER} #{RABBITMQ_PASSWORD}
+        rabbitmq-plugins enable rabbitmq_management
+      SHELL
     end
-    sv5webportal.vm.network "private_network", ip: SV_WEBPORTAL_IP
-    sv5webportal.vm.synced_folder "./config/", "/config"
-    sv5webportal.vm.synced_folder "./distr/", "/distr"
-    sv5webportal.vm.provision "shell", inline: <<-SHELL
-        chmod +x /distr/installer-console.v5
-        /distr/installer-console.v5 --config /config/webportal.json
-    SHELL
   end
+
+
+  # config.vm.define "sv5services" do |sv5services|
+  #   sv5services.vm.box = VM_BOX
+  #   sv5services.vm.hostname = 'sv5services'
+  #   sv5services.vm.provider "virtualbox" do |v|
+  #     v.name = "sv5 services"
+  #     v.memory = SV_SERVICES_RAM
+  #     v.cpus = SV_SERVICES_CPU
+  #   end
+  #   sv5services.vm.network "private_network", ip: SV_SERVICES_1_IP
+  #   sv5services.vm.synced_folder "./config/", "/config"
+  #   sv5services.vm.synced_folder "./distr/", "/distr"
+  #   sv5services.vm.provision "shell", path: "downloader.sh", env: {
+  #     "NEXUS_LOGIN" => ENV["NEXUS_LOGIN"],
+  #     "NEXUS_PASSWORD" => ENV["NEXUS_PASSWORD"],
+  #     "NEXUS_URL" => ENV["NEXUS_URL"],
+  #     "NEXUS_FILE" => "SecurityVisionPlatform-console.v5",
+  #     "FILE_PATH" => "/distr/installer-console.v5"
+  #   }
+  #   sv5services.vm.provision "shell", inline: <<-SHELL
+  #     chmod +x /distr/installer-console.v5
+  #     /distr/installer-console.v5 --config /config/services.json
+  #   SHELL
+  # end
+
+
+  # config.vm.define "sv5webportal" do |sv5webportal|
+  #   sv5webportal.vm.box = VM_BOX
+  #   sv5webportal.vm.hostname = "sv5webportal"
+  #   sv5webportal.vm.provider "virtualbox" do |v|
+  #     v.name = "sv5 webportal"
+  #     v.memory = SV_WEBPORTAL_RAM
+  #     v.cpus = SV_WEBPORTAL_CPU
+  #   end
+  #   sv5webportal.vm.network "private_network", ip: SV_WEBPORTAL_1_IP
+  #   sv5webportal.vm.synced_folder "./config/", "/config"
+  #   sv5webportal.vm.synced_folder "./distr/", "/distr"
+  #   sv5webportal.vm.provision "shell", inline: <<-SHELL
+  #       chmod +x /distr/installer-console.v5
+  #       /distr/installer-console.v5 --config /config/webportal.json
+  #   SHELL
+  # end
 
 end

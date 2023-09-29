@@ -24,32 +24,29 @@ listen stats
 
 listen sv5postgres
   bind *:5432
-  option httpchk
   http-check expect status 200
   default-server inter 3s fall 3 rise 2 on-marked-down shutdown-sessions
-  server pgnode1 $MASTER_IP:5432 maxconn 100 check port 8008
-  server pgnode2 $SLAVE_1_IP:5432 maxconn 100 check port 8008
-  server pgnode3 $SLAVE_2_IP:5432 maxconn 100 check port 8008
+  server pgnode1 $PG_NODE_1:5432 maxconn 100 check port 8008
+  server pgnode2 $PG_NODE_2:5432 maxconn 100 check port 8008
+  server pgnode3 $PG_NODE_3:5432 maxconn 100 check port 8008
 
 listen sv5elastic
   bind *:9200
-  option httpchk
   http-check expect status 200
-  server sv5elastic $SV_ELASTIC_IP:9200 maxconn 100 check port 9200
+  server sv5elastic $SV_ELASTIC_1_IP:9200 maxconn 100 check port 9200
+  server sv5elastic $SV_ELASTIC_2_IP:9200 backup maxconn 100 check port 9200
 
 listen  sv5rabbitmq 
   bind *:5672
-  server sv5rabbitmq $SV_RABBITMQ_IP:5672 maxconn 1000 check port 5672
-
-listen sv5connectors
-  bind *:9210
-  server sv5connector1 $SV_CONNECTORS_1_IP:9210 maxconn 100 check port 9210
-  server sv5connector2 $SV_CONNECTORS_2_IP:9210 maxconn 100 check port 9210
-  server sv5connector3 $SV_CONNECTORS_3_IP:9210 maxconn 100 check port 9210
+  server sv5rabbitmq $SV_RABBITMQ_1_IP:5672 maxconn 1000 check port 5672
+  server sv5rabbitmq $SV_RABBITMQ_2_IP:5672 backup maxconn 1000 check port 5672
 
 listen sv5webportal
   bind *:443
-  server sv5webportal $SV_WEBPORTAL_IP:443 maxconn 100 check port 443
+  http-check expect status 200
+  default-server inter 3s fall 3 rise 2 on-marked-down shutdown-sessions
+  server sv5webportal $SV_WEBPORTAL_1_IP:443 maxconn 100 check port 443
+  server sv5webportal $SV_WEBPORTAL_2_IP:443 backup maxconn 100 check port 443
 
 " > /etc/haproxy/haproxy.cfg
 
