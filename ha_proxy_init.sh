@@ -35,13 +35,13 @@ listen sv5elastic
   bind *:9200
   http-check expect status 200
   option httpchk
-  server sv5elastic $SV_ELASTIC_1_IP:9200 maxconn 100 check port 9200
-  server sv5elastic $SV_ELASTIC_2_IP:9200 backup maxconn 100 check port 9200
+  server sv5elastic $ELASTIC_1_IP:9200 maxconn 100 check port 9200
+  server sv5elastic $ELASTIC_2_IP:9200 backup maxconn 100 check port 9200
 
 listen  sv5rabbitmq 
   bind *:5672
-  server sv5rabbitmq $SV_RABBITMQ_1_IP:5672 maxconn 1000 check port 5672
-  server sv5rabbitmq $SV_RABBITMQ_2_IP:5672 backup maxconn 1000 check port 5672
+  server sv5rabbitmq $RABBITMQ_1_IP:5672 maxconn 1000 check port 5672
+  server sv5rabbitmq $RABBITMQ_2_IP:5672 backup maxconn 1000 check port 5672
 
 listen sv5webportal
   bind *:443

@@ -32,7 +32,7 @@ SV_WEBPORTAL_1_IP = "192.168.56.120"
 SV_WEBPORTAL_2_IP = "192.168.56.121"
 
 POSTGRES_MAJOR_VERSION = 14
-RABBITMQ_USER = "user"
+POSTGRES_USER = "postgres"
 POSTGRES_PASSWORD = "sv5password"
 POSTGRES_DATABASE = "SecurityVision"
 
@@ -61,6 +61,7 @@ Vagrant.configure(2) do |config|
         "NODE_NAME" => "pgnode#{i}",
         "ETCD_CLUSTER_TOKEN" => ETCD_CLUSTER_TOKEN,
         "POSTGRES_MAJOR_VERSION" => POSTGRES_MAJOR_VERSION,
+        "POSTGRES_USER" => POSTGRES_USER,
         "POSTGRES_PASSWORD" => POSTGRES_PASSWORD,
         "HA_PROXY_IP" => HA_PROXY_IP,
         "PG_NODE_1_IP" => PG_NODE_1_IP,
@@ -116,7 +117,7 @@ Vagrant.configure(2) do |config|
   ELASTIC_IP_ARRAY = [ELASTIC_1_IP, ELASTIC_2_IP]
 
   (1..$elastic_count).each do |i|
-    config.vm.define "sv5elastic" do |sv5elastic|
+    config.vm.define "sv5elastic#{i}" do |sv5elastic|
       sv5elastic.vm.box = VM_BOX
       sv5elastic.vm.hostname = "sv5elastic#{i}"
       sv5elastic.vm.provider "virtualbox" do |v|
@@ -147,7 +148,7 @@ Vagrant.configure(2) do |config|
   RABBIT_IP_ARRAY = [RABBITMQ_1_IP, RABBITMQ_2_IP]
 
   (1..$rabbit_count).each do |i|
-    config.vm.define "sv5rabbitmq" do |sv5rabbitmq|
+    config.vm.define "sv5rabbitmq#{i}" do |sv5rabbitmq|
       sv5rabbitmq.vm.box = VM_BOX
       sv5rabbitmq.vm.hostname = "sv5rabbitmq#{i}"
       sv5rabbitmq.vm.provider "virtualbox" do |v|
@@ -174,6 +175,15 @@ Vagrant.configure(2) do |config|
       SHELL
     end
   end
+
+
+
+
+
+
+
+
+
 
   # config.vm.define "sv5services" do |sv5services|
   #   sv5services.vm.box = VM_BOX

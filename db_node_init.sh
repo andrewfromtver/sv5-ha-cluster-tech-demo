@@ -12,8 +12,8 @@ pip3 install psycopg2 patroni[etcd]
 # setup postgres
 pg_ctlcluster $POSTGRES_MAJOR_VERSION main start
 sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/g" /etc/postgresql/$POSTGRES_MAJOR_VERSION/main/postgresql.conf
-su postgres << EOF
-  psql -c "alter user postgres with password '$POSTGRES_PASSWORD';"
+su $POSTGRES_USER << EOF
+  psql -c "alter user $POSTGRES_USER with password '$POSTGRES_PASSWORD';"
 EOF
 
 # stop services
@@ -56,8 +56,8 @@ After=syslog.target network.target
 
 [Service]
 Type=simple
-User=postgres
-Group=postgres
+User=$POSTGRES_USER
+Group=$POSTGRES_USER
 ExecStart=/usr/local/bin/patroni /etc/patroni.yml
 KillMode=process
 TimeoutSec=30
@@ -102,11 +102,11 @@ bootstrap:
     - data-checksums
     - locale: en_US.UTF8
     pg_hba:
-    - host replication postgres 127.0.0.1/32 md5
-    - host replication postgres $PG_NODE_1_IP/0 md5
-    - host replication postgres $PG_NODE_2_IP/0 md5
-    - host replication postgres $PG_NODE_3_IP/0 md5
-    - host all all $HA_PROXY_IP/0 md5
+    - host replication $POSTGRES_USER 127.0.0.1/32 md5
+    - host replication $POSTGRES_USER $PG_NODE_1_IP/32 md5
+    - host replication $POSTGRES_USER $PG_NODE_2_IP/32 md5
+    - host replication $POSTGRES_USER $PG_NODE_3_IP/32 md5
+    - host all $POSTGRES_USER $HA_PROXY_IP/32 md5
 
 postgresql:
     listen: $CURRENT_NODE_IP:5432
@@ -116,10 +116,10 @@ postgresql:
     pgpass: /tmp/pgpass
     authentication:
         replication:
-            username: postgres
+            username: $POSTGRES_USER
             password: $POSTGRES_PASSWORD
         superuser:
-            username: postgres
+            username: $POSTGRES_USER
             password: $POSTGRES_PASSWORD
     create_replica_methods:
         basebackup:
@@ -135,7 +135,7 @@ tags:
 " > /etc/patroni.yml
 
 mkdir -p /data/patroni
-chown postgres:postgres /data/patroni
+chown $POSTGRES_USER:$POSTGRES_USER /data/patroni
 chmod 700 /data/patroni
 
 # realod systemd
