@@ -144,7 +144,7 @@ Vagrant.configure(2) do |config|
 
 
   $rabbit_count = 2
-  RABBIT_IP_ARRAY = [SV_RABBIT_1_IP, SV_RABBIT_2_IP]
+  RABBIT_IP_ARRAY = [RABBIT_1_IP, RABBIT_2_IP]
 
   (1..$rabbit_count).each do |i|
     config.vm.define "sv5rabbitmq" do |sv5rabbitmq|
