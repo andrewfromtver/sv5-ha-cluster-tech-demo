@@ -164,7 +164,7 @@ Vagrant.configure(2) do |config|
         rabbitmqctl set_user_tags #{RABBITMQ_USER} administrator
         rabbitmqctl set_permissions -p / #{RABBITMQ_USER} ".*" ".*" ".*"
         rabbitmqctl authenticate_user #{RABBITMQ_USER} #{RABBITMQ_PASSWORD}
-        rabbitmq-plugins enable rabbitmq_management
+        # rabbitmq-plugins enable rabbitmq_management
       SHELL
     end
   end
@@ -203,6 +203,12 @@ Vagrant.configure(2) do |config|
           sv5services.vm.provision "shell", inline: <<-SHELL
             tar -xvf /distr/redist.tar.gz
             chmod +x /distr/installer-console.v5
+            sed -i "s/POSTGRES_USER/"#{POSTGRES_USER}"/g" /config/*.json
+            sed -i "s/POSTGRES_PASSWORD/"#{POSTGRES_PASSWORD}"/g" /config/*.json
+            sed -i "s/POSTGRES_DATABASE/"#{POSTGRES_DATABASE}"/g" /config/*.json
+            sed -i "s/RABBITMQ_USER/"#{RABBITMQ_USER}"/g" /config/*.json
+            sed -i "s/RABBITMQ_PASSWORD/"#{RABBITMQ_PASSWORD}"/g" /config/*.json
+            sed -i "s/HAPROXY_IP/"#{HA_PROXY_IP}"/g" /config/*.json
           SHELL
         end
       end

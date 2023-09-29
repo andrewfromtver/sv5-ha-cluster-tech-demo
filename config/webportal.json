@@ -4,25 +4,25 @@
 			{
 				"jType": "Postgre",
 				"account": {
-					"login": "postgres",
-					"password": "sv5password"					
+					"login": "POSTGRES_USER",
+					"password": "POSTGRES_PASSWORD"					
 				},
 				"server": {
-					"host": "192.168.56.110",
-					"dbName": "SecurityVision",
+					"host": "HAPROXY_IP",
+					"dbName": "POSTGRES_DB_NAME",
 					"port": 5432
 				}
 			},
 			{
 				"jType": "RabbitMq",
-				"host": "192.168.56.110",
+				"host": "HAPROXY_IP",
 				"port": 5672,
-				"username": "user",
-				"password": "sv5password"
+				"username": "RABBITMQ_USER",
+				"password": "RABBITMQ_PASSWORD"
 			},
 			{
 				"jType": "Elastic",
-				"uri": "http://192.168.56.100:9200"
+				"uri": "http://HAPROXY_IP:9200"
 			}
 		],
 		"destinationPath": "/opt/securityvision/"
