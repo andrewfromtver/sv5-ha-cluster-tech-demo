@@ -142,7 +142,6 @@ Vagrant.configure(2) do |config|
     end
   end
 
-
   $rabbit_count = 2
   RABBIT_IP_ARRAY = [RABBITMQ_1_IP, RABBITMQ_2_IP]
 
@@ -194,12 +193,20 @@ Vagrant.configure(2) do |config|
             "NEXUS_FILE" => "SecurityVisionPlatform-console.v5",
             "FILE_PATH" => "/distr/installer-console.v5"
           }
+          sv5services.vm.provision "shell", path: "downloader.sh", env: {
+            "NEXUS_LOGIN" => ENV["NEXUS_LOGIN"],
+            "NEXUS_PASSWORD" => ENV["NEXUS_PASSWORD"],
+            "NEXUS_URL" => ENV["NEXUS_URL"],
+            "NEXUS_FILE" => "redist.tar.gz",
+            "FILE_PATH" => "/distr/redist.tar.gz"
+          }
+          sv5services.vm.provision "shell", inline: <<-SHELL
+            tar -xvf /distr/redist.tar.gz
+            chmod +x /distr/installer-console.v5
+          SHELL
         end
       end
       sv5services.vm.provision "shell", inline: <<-SHELL
-        apt-get update
-        apt-get install -y nginx
-        chmod +x /distr/installer-console.v5
         /distr/installer-console.v5 --config /config/services.json
       SHELL
     end
@@ -221,9 +228,6 @@ Vagrant.configure(2) do |config|
       sv5webportal.vm.synced_folder "./config/", "/config"
       sv5webportal.vm.synced_folder "./distr/", "/distr"
       sv5webportal.vm.provision "shell", inline: <<-SHELL
-          apt-get update
-          apt-get install -y nginx
-          chmod +x /distr/installer-console.v5
           /distr/installer-console.v5 --config /config/webportal.json
       SHELL
     end
