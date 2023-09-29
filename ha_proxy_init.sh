@@ -25,6 +25,7 @@ listen stats
 listen sv5postgres
   bind *:5432
   http-check expect status 200
+  option httpchk
   default-server inter 3s fall 3 rise 2 on-marked-down shutdown-sessions
   server pgnode1 $PG_NODE_1_IP:5432 maxconn 100 check port 8008
   server pgnode2 $PG_NODE_2_IP:5432 maxconn 100 check port 8008
@@ -33,6 +34,7 @@ listen sv5postgres
 listen sv5elastic
   bind *:9200
   http-check expect status 200
+  option httpchk
   server sv5elastic $SV_ELASTIC_1_IP:9200 maxconn 100 check port 9200
   server sv5elastic $SV_ELASTIC_2_IP:9200 backup maxconn 100 check port 9200
 
@@ -44,6 +46,7 @@ listen  sv5rabbitmq
 listen sv5webportal
   bind *:443
   http-check expect status 200
+  option httpchk
   default-server inter 3s fall 3 rise 2 on-marked-down shutdown-sessions
   server sv5webportal $SV_WEBPORTAL_1_IP:443 maxconn 100 check port 443
   server sv5webportal $SV_WEBPORTAL_2_IP:443 backup maxconn 100 check port 443
