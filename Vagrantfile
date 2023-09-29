@@ -126,7 +126,6 @@ Vagrant.configure(2) do |config|
   #       v.cpus = SV_ELASTIC_CPU
   #     end
   #     sv5elastic.vm.network "private_network", ip: ELASTIC_IP_ARRAY[i - 1]
-  #     sv5elastic.vm.synced_folder "./distr/", "/distr"
   #     sv5elastic.vm.provision "shell", inline: <<-SHELL
   #       apt-get update
   #       apt-get install -y gnupg2 apt-transport-https
@@ -157,12 +156,7 @@ Vagrant.configure(2) do |config|
         v.cpus = SV_RABBITMQ_CPU
       end
       sv5rabbitmq.vm.network "private_network", ip: RABBIT_IP_ARRAY[i - 1]
-      sv5rabbitmq.vm.synced_folder "./distr/", "/distr"
       sv5rabbitmq.vm.provision "shell", inline: <<-SHELL
-        wget https://packages.erlang-solutions.com/erlang-solutions_1.0_all.deb
-        dpkg -i erlang-solutions_1.0_all.deb
-        apt-get update
-        apt-get install -y erlang erlang-nox
         add-apt-repository 'deb http://www.rabbitmq.com/debian/ testing main'
         wget -O- https://www.rabbitmq.com/rabbitmq-release-signing-key.asc | apt-key add -
         apt-get update
