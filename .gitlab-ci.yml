@@ -37,8 +37,6 @@ database_cluster_deploy-job:
   cache:
     paths:
       - .vagrant
-  before_script:
-    - curl "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage?chat_id=$TELEGRAM_CHAT_ID&text=%20🛠%20%5B$CI_PROJECT_NAME%5D%20Deploy%20job%20started"
   script:
     - vagrant up pgnode1 pgnode2 pgnode3 2>&1 | tee db_cluster_deploy.log
   after_script:
@@ -57,8 +55,6 @@ elasticsearch_nodes_deploy-job:
   cache:
     paths:
       - .vagrant
-  before_script:
-    - curl "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage?chat_id=$TELEGRAM_CHAT_ID&text=%20🛠%20%5B$CI_PROJECT_NAME%5D%20Deploy%20job%20started"
   script:
     - vagrant up elastic1 elastic2 2>&1 | tee elasticsearch_nodes_deploy.log
   after_script:
@@ -77,8 +73,6 @@ rabbitmq_nodes_deploy-job:
   cache:
     paths:
       - .vagrant
-  before_script:
-    - curl "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage?chat_id=$TELEGRAM_CHAT_ID&text=%20🛠%20%5B$CI_PROJECT_NAME%5D%20Deploy%20job%20started"
   script:
     - vagrant up rabbitmq1 rabbitmq2 2>&1 | tee rabbitmq_nodes_deploy.log
   after_script:
@@ -97,8 +91,6 @@ sv_services_nodes_deploy-job:
   cache:
     paths:
       - .vagrant
-  before_script:
-    - curl "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage?chat_id=$TELEGRAM_CHAT_ID&text=%20🛠%20%5B$CI_PROJECT_NAME%5D%20Deploy%20job%20started"
   script:
     - vagrant up sv5services1 sv5services2 2>&1 | tee sv_services_nodes_deploy.log
   after_script:
@@ -117,8 +109,6 @@ sw_webportal_nodes_deploy-job:
   cache:
     paths:
       - .vagrant
-  before_script:
-    - curl "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage?chat_id=$TELEGRAM_CHAT_ID&text=%20🛠%20%5B$CI_PROJECT_NAME%5D%20Deploy%20job%20started"
   script:
     - vagrant up sv5webportal1 sv5webportal2 2>&1 | tee sw_webportal_nodes_deploy.log
   after_script:
