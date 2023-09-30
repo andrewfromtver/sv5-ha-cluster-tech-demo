@@ -9,7 +9,7 @@
 				},
 				"server": {
 					"host": "HAPROXY_IP",
-					"dbName": "POSTGRES_DB_NAME",
+					"dbName": "POSTGRES_DATABASE",
 					"port": 5432
 				}
 			},
