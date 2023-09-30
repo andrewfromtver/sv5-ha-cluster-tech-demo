@@ -2,10 +2,36 @@ variables:
     GIT_CLONE_PATH: '$CI_BUILDS_DIR/$CI_PROJECT_NAME'
 
 stages:
-  - deploy
+  - haproxy_deploy
+  - database_cluster_deploy
+  - elasticsearch_nodes_deploy
+  - rabbitmq_nodes_deploy
+  - sv_services_nodes_deploy
+  - sw_webportal_nodes_deploy
 
-deploy-job:
-  stage: deploy
+haproxy_deploy-job:
+  stage: haproxy_deploy
+  tags:
+    - vagrant
+  cache:
+    paths:
+      - .vagrant
+  before_script:
+    - curl "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage?chat_id=$TELEGRAM_CHAT_ID&text=%20🛠%20%5B$CI_PROJECT_NAME%5D%20Deploy%20job%20started"
+    - vagrant destroy -f
+  script:
+    - vagrant up haproxy 2>&1 | tee haproxy_deploy.log
+  after_script:
+    - >
+      if [ $CI_JOB_STATUS == 'success' ]; then
+        curl -F document=@"haproxy_deploy.log" https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendDocument?chat_id=$TELEGRAM_CHAT_ID
+      else
+        vagrant destroy -f
+        curl "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage?chat_id=$TELEGRAM_CHAT_ID&text=%20❌%20%5B$CI_PROJECT_NAME%5D%20Deploy%20job%20failed%20$CI_PIPELINE_URL"
+      fi
+
+database_cluster_deploy-job:
+  stage: database_cluster_deploy
   tags:
     - vagrant
   cache:
@@ -14,12 +40,91 @@ deploy-job:
   before_script:
     - curl "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage?chat_id=$TELEGRAM_CHAT_ID&text=%20🛠%20%5B$CI_PROJECT_NAME%5D%20Deploy%20job%20started"
   script:
-    - vagrant destroy -f
-    - vagrant up 2>&1 | tee deploy.log
+    - vagrant up pgnode1 pgnode2 pgnode3 2>&1 | tee db_cluster_deploy.log
   after_script:
     - >
       if [ $CI_JOB_STATUS == 'success' ]; then
-        curl -F document=@"deploy.log" https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendDocument?chat_id=$TELEGRAM_CHAT_ID
+        curl -F document=@"db_cluster_deploy.log" https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendDocument?chat_id=$TELEGRAM_CHAT_ID
+      else
+        vagrant destroy -f
+        curl "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage?chat_id=$TELEGRAM_CHAT_ID&text=%20❌%20%5B$CI_PROJECT_NAME%5D%20Deploy%20job%20failed%20$CI_PIPELINE_URL"
+      fi
+
+elasticsearch_nodes_deploy-job:
+  stage: elasticsearch_nodes_deploy
+  tags:
+    - vagrant
+  cache:
+    paths:
+      - .vagrant
+  before_script:
+    - curl "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage?chat_id=$TELEGRAM_CHAT_ID&text=%20🛠%20%5B$CI_PROJECT_NAME%5D%20Deploy%20job%20started"
+  script:
+    - vagrant up elastic1 elastic2 2>&1 | tee elasticsearch_nodes_deploy.log
+  after_script:
+    - >
+      if [ $CI_JOB_STATUS == 'success' ]; then
+        curl -F document=@"elasticsearch_nodes_deploy.log" https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendDocument?chat_id=$TELEGRAM_CHAT_ID
+      else
+        vagrant destroy -f
+        curl "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage?chat_id=$TELEGRAM_CHAT_ID&text=%20❌%20%5B$CI_PROJECT_NAME%5D%20Deploy%20job%20failed%20$CI_PIPELINE_URL"
+      fi
+
+rabbitmq_nodes_deploy-job:
+  stage: rabbitmq_nodes_deploy
+  tags:
+    - vagrant
+  cache:
+    paths:
+      - .vagrant
+  before_script:
+    - curl "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage?chat_id=$TELEGRAM_CHAT_ID&text=%20🛠%20%5B$CI_PROJECT_NAME%5D%20Deploy%20job%20started"
+  script:
+    - vagrant up rabbitmq1 rabbitmq2 2>&1 | tee rabbitmq_nodes_deploy.log
+  after_script:
+    - >
+      if [ $CI_JOB_STATUS == 'success' ]; then
+        curl -F document=@"rabbitmq_nodes_deploy.log" https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendDocument?chat_id=$TELEGRAM_CHAT_ID
+      else
+        vagrant destroy -f
+        curl "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage?chat_id=$TELEGRAM_CHAT_ID&text=%20❌%20%5B$CI_PROJECT_NAME%5D%20Deploy%20job%20failed%20$CI_PIPELINE_URL"
+      fi
+
+sv_services_nodes_deploy-job:
+  stage: sv_services_nodes_deploy
+  tags:
+    - vagrant
+  cache:
+    paths:
+      - .vagrant
+  before_script:
+    - curl "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage?chat_id=$TELEGRAM_CHAT_ID&text=%20🛠%20%5B$CI_PROJECT_NAME%5D%20Deploy%20job%20started"
+  script:
+    - vagrant up sv5services1 sv5services2 2>&1 | tee sv_services_nodes_deploy.log
+  after_script:
+    - >
+      if [ $CI_JOB_STATUS == 'success' ]; then
+        curl -F document=@"sv_services_nodes_deploy.log" https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendDocument?chat_id=$TELEGRAM_CHAT_ID
+      else
+        vagrant destroy -f
+        curl "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage?chat_id=$TELEGRAM_CHAT_ID&text=%20❌%20%5B$CI_PROJECT_NAME%5D%20Deploy%20job%20failed%20$CI_PIPELINE_URL"
+      fi
+
+sw_webportal_nodes_deploy-job:
+  stage: sw_webportal_nodes_deploy
+  tags:
+    - vagrant
+  cache:
+    paths:
+      - .vagrant
+  before_script:
+    - curl "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage?chat_id=$TELEGRAM_CHAT_ID&text=%20🛠%20%5B$CI_PROJECT_NAME%5D%20Deploy%20job%20started"
+  script:
+    - vagrant up sv5webportal1 sv5webportal2 2>&1 | tee sw_webportal_nodes_deploy.log
+  after_script:
+    - >
+      if [ $CI_JOB_STATUS == 'success' ]; then
+        curl -F document=@"sw_webportal_nodes_deploy.log" https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendDocument?chat_id=$TELEGRAM_CHAT_ID
         curl "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage?chat_id=$TELEGRAM_CHAT_ID&text=%20🚀%20%5B$CI_PROJECT_NAME%5D%20Deploy%20job%20completed%20$PROJECT_URL"
       else
         vagrant destroy -f
