@@ -6,8 +6,7 @@ stages:
   - database_cluster_deploy
   - elasticsearch_nodes_deploy
   - rabbitmq_nodes_deploy
-  - sv_services_nodes_deploy
-  - sw_webportal_nodes_deploy
+  - sv_nodes_deploy
 
 haproxy_deploy-job:
   stage: haproxy_deploy
@@ -84,37 +83,19 @@ rabbitmq_nodes_deploy-job:
         curl "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage?chat_id=$TELEGRAM_CHAT_ID&text=%20❌%20%5B$CI_PROJECT_NAME%5D%20Deploy%20job%20failed%20$CI_PIPELINE_URL"
       fi
 
-sv_services_nodes_deploy-job:
-  stage: sv_services_nodes_deploy
+sw_nodes_deploy-job:
+  stage: sw_nodes_deploy
   tags:
     - vagrant
   cache:
     paths:
       - .vagrant
   script:
-    - vagrant up sv5services1 sv5services2 2>&1 | tee sv_services_nodes_deploy.log
+    - vagrant up sv5services1 sv5services2 sv5webportal1 sv5webportal2 2>&1 | tee sw_nodes_deploy.log
   after_script:
     - >
       if [ $CI_JOB_STATUS == 'success' ]; then
-        curl -F document=@"sv_services_nodes_deploy.log" https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendDocument?chat_id=$TELEGRAM_CHAT_ID
-      else
-        vagrant destroy -f
-        curl "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage?chat_id=$TELEGRAM_CHAT_ID&text=%20❌%20%5B$CI_PROJECT_NAME%5D%20Deploy%20job%20failed%20$CI_PIPELINE_URL"
-      fi
-
-sw_webportal_nodes_deploy-job:
-  stage: sw_webportal_nodes_deploy
-  tags:
-    - vagrant
-  cache:
-    paths:
-      - .vagrant
-  script:
-    - vagrant up sv5webportal1 sv5webportal2 2>&1 | tee sw_webportal_nodes_deploy.log
-  after_script:
-    - >
-      if [ $CI_JOB_STATUS == 'success' ]; then
-        curl -F document=@"sw_webportal_nodes_deploy.log" https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendDocument?chat_id=$TELEGRAM_CHAT_ID
+        curl -F document=@"sw_nodes_deploy.log" https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendDocument?chat_id=$TELEGRAM_CHAT_ID
         curl "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage?chat_id=$TELEGRAM_CHAT_ID&text=%20🚀%20%5B$CI_PROJECT_NAME%5D%20Deploy%20job%20completed%20$PROJECT_URL"
       else
         vagrant destroy -f
