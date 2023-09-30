@@ -9,6 +9,7 @@
 
 # Deployment
 * Start deployment with `vagrant up` command
+* To fix postgres node after reboot - start node, stop postgresql service `systemctl stop postgresql` and reinit patroni node `patronictl -c /etc/patroni.yml reinit [cluster_name] [node_name]`
 
 # Env vars
 * `$NEXUS_LOGIN`
