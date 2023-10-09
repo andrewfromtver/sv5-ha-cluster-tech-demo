@@ -5,16 +5,16 @@ apt-get -y install haproxy
 
 echo "\
 global
-  maxconn 5000
+  maxconn 1000
 
 defaults
   log global
   mode tcp
-  retries 2
+  retries 3
   timeout client 30m
-  timeout connect 4s
+  timeout connect 1s
   timeout server 30m
-  timeout check 5s
+  timeout check 1s
 
 listen stats
   mode http
@@ -43,7 +43,7 @@ listen  rabbitmq
   server sv5rabbitmq1 $RABBITMQ_1_IP:5672 maxconn 100 check port 5672
   server sv5rabbitmq2 $RABBITMQ_2_IP:5672 backup maxconn 100 check port 5672
 
-listen sv5webportal
+listen sv5services
   bind *:9210
   server sv5services1 $SV_SERVICES_1_IP:9210 maxconn 100 check port 9210
   server sv5services2 $SV_SERVICES_2_IP:9210 backup maxconn 100 check port 9210
