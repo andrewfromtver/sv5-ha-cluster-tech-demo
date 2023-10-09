@@ -10,11 +10,11 @@ global
 defaults
   log global
   mode tcp
-  retries 3
+  retries 2
   timeout client 30m
-  timeout connect 3s
+  timeout connect 2s
   timeout server 30m
-  timeout check 1s
+  timeout check 3s
 
 listen stats
   mode http
