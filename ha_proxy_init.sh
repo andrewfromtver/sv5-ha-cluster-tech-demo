@@ -5,16 +5,16 @@ apt-get -y install haproxy
 
 echo "\
 global
-  maxconn 5000
+  maxconn 1000
 
 defaults
   log global
   mode tcp
-  retries 2
+  retries 3
   timeout client 30m
-  timeout connect 4s
+  timeout connect 3s
   timeout server 30m
-  timeout check 5s
+  timeout check 1s
 
 listen stats
   mode http
