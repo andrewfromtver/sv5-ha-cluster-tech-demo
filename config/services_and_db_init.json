@@ -1,0 +1,85 @@
+{
+	"environment": {
+		"connection": [
+			{
+				"jType": "Postgre",
+				"account": {
+					"login": "POSTGRES_USER",
+					"password": "POSTGRES_PASSWORD"					
+				},
+				"server": {
+					"host": "HAPROXY_IP",
+					"dbName": "POSTGRES_DATABASE",
+					"port": 5432
+				}
+			},
+			{
+				"jType": "RabbitMq",
+				"host": "HAPROXY_IP",
+				"port": 5672,
+				"username": "RABBITMQ_USER",
+				"password": "RABBITMQ_PASSWORD"
+			},
+			{
+				"jType": "Elastic",
+				"uri": "http://HAPROXY_IP:9200"
+			}
+		],
+		"destinationPath": "/opt/securityvision/"
+	},
+	"features": [	
+		{
+			"jType": "PortalDatabase"
+		},
+		{
+			"jType": "Service",
+			"serviceKey": "collector",
+			"runAccount": {
+				"type": "New",
+				"username": "sv"
+			}
+		},
+		{
+			"jType": "Service",
+			"serviceKey": "connectors",
+			"runAccount": {
+				"type": "New",
+				"username": "sv"
+			}
+		},
+		{
+			"jType": "Service",
+			"serviceKey": "processing",
+			"runAccount": {
+				"type": "New",
+				"username": "sv"
+			}
+		},
+		{
+			"jType": "Service",
+			"serviceKey": "notifications",
+			"runAccount": {
+				"type": "New",
+				"username": "sv"
+			}
+		},
+		{
+			"jType": "Service",
+			"serviceKey": "reporting",
+			"runAccount": {
+				"type": "New",
+				"username": "sv"
+			}
+		},
+		{
+			"jType": "Nginx",
+			"cert": {
+				"type": "SelfSigned"
+			},
+			"runAccount": {
+				"username": "nginx"
+			}
+		}
+	],
+	"jType": "Install"
+}

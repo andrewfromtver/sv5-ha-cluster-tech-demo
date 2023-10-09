@@ -81,6 +81,7 @@ Vagrant.configure(2) do |config|
         end
         if(i == $pg_count) then
           pgnode.vm.provision "shell", run: 'always', inline: <<-SHELL
+            sleep 10
             patronictl -c /etc/patroni.yml reinit pgsql
             # check cluster status
             etcdctl member list
@@ -214,9 +215,15 @@ Vagrant.configure(2) do |config|
           SHELL
         end
       end
-      sv5services.vm.provision "shell", inline: <<-SHELL
-        /distr/installer-console.v5 --config /config/services.json
-      SHELL
+      if(i == 1) then
+        sv5services.vm.provision "shell", inline: <<-SHELL
+          /distr/installer-console.v5 --config /config/services_and_db_init.json
+        SHELL
+      else
+        sv5services.vm.provision "shell", inline: <<-SHELL
+          /distr/installer-console.v5 --config /config/services.json
+        SHELL
+      end
     end
   end
 
