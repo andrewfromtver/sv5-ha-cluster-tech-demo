@@ -81,7 +81,7 @@ Vagrant.configure(2) do |config|
         end
         if(i == $pg_count) then
           pgnode.vm.provision "shell", run: 'always', inline: <<-SHELL
-            sleep 10
+            sleep 5
             patronictl -c /etc/patroni.yml reinit pgsql
             # check cluster status
             etcdctl member list
