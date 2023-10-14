@@ -74,6 +74,8 @@ Vagrant.configure(2) do |config|
           pgnode.vm.provision "shell", run: 'always', inline: <<-SHELL
             systemctl stop postgresql
             systemctl disable postgresql
+            systemctl start etcd &
+            systemctl start patroni &
           SHELL
         end
         if(i == $pg_count) then
