@@ -73,19 +73,20 @@ Vagrant.configure(2) do |config|
         if(i <= $pg_count) then
           pgnode.vm.provision "shell", run: 'always', inline: <<-SHELL
             systemctl stop postgresql
-            systemctl enable etcd &
+            systemctl disable postgresql
             systemctl start etcd &
-            systemctl enable patroni &
+            systemctl enable etcd
             systemctl start patroni &
+            systemctl enable patroni
           SHELL
         end
         if(i == $pg_count) then
           pgnode.vm.provision "shell", run: 'always', inline: <<-SHELL
             sleep 5
-            patronictl -c /etc/patroni.yml reinit pgsql
             # check cluster status
             etcdctl member list
             patronictl -c /etc/patroni.yml list
+            # patronictl -c /etc/patroni.yml reinit pgsql
           SHELL
         end
       end
@@ -167,7 +168,7 @@ Vagrant.configure(2) do |config|
         rabbitmqctl set_user_tags #{RABBITMQ_USER} administrator
         rabbitmqctl set_permissions -p / #{RABBITMQ_USER} ".*" ".*" ".*"
         rabbitmqctl authenticate_user #{RABBITMQ_USER} #{RABBITMQ_PASSWORD}
-        # rabbitmq-plugins enable rabbitmq_management
+        rabbitmq-plugins enable rabbitmq_management
       SHELL
     end
   end
