@@ -73,18 +73,16 @@ Vagrant.configure(2) do |config|
         if(i <= $pg_count) then
           pgnode.vm.provision "shell", run: 'always', inline: <<-SHELL
             systemctl stop postgresql
-            systemctl disable postgresql
             systemctl start etcd &
             systemctl start patroni &
           SHELL
         end
         if(i == $pg_count) then
           pgnode.vm.provision "shell", run: 'always', inline: <<-SHELL
-            sleep 5
+            sleep 3
             # check cluster status
             etcdctl member list
             patronictl -c /etc/patroni.yml list
-            # patronictl -c /etc/patroni.yml reinit pgsql
           SHELL
         end
       end
